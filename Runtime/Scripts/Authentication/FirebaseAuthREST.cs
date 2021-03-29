@@ -21,10 +21,13 @@ namespace UnityFirebaseREST
             remove { onStateChanged -= value; }
         }
 
-        public FirebaseUser currentUser;
+        private FirebaseUser currentUser;
+
+        public FirebaseUser CurrentUser { get => currentUser;  set => currentUser = value; }
 
         public FirebaseAuthREST() 
         {
+
         }
 
         internal void UpdateCurrentUser() 
