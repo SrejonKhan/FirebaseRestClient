@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Proyecto26;
 
-namespace UnityFirebaseREST
+namespace FirebaseRestClient
 {
     public class Unsubscriber : MonoBehaviour
     {

@@ -3,58 +3,61 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class UnityMainThread : MonoBehaviour
+namespace FirebaseRestClient
 {
-    private static List<Action> queuedMethods = new List<Action>(); //List of methods to execute in Main Thread
-    private static List<Action> cQueuedMethods = new List<Action>(); //List for caching
-
-    private volatile static bool isFree = true;
-
-    private static UnityMainThread instance;
-
-
-    public static void Init()
+    public class UnityMainThread : MonoBehaviour
     {
-        if (instance != null) return;
+        private static List<Action> queuedMethods = new List<Action>(); //List of methods to execute in Main Thread
+        private static List<Action> cQueuedMethods = new List<Action>(); //List for caching
 
-        GameObject obj = new GameObject("UnityMainThread");
-        DontDestroyOnLoad(obj);
-        instance = obj.AddComponent<UnityMainThread>();
-    }
+        private volatile static bool isFree = true;
 
-    public static void Execute(Action action)
-    {
-        if (instance == null) return; 
+        private static UnityMainThread instance;
 
-        lock (queuedMethods)
+
+        public static void Init()
         {
-            queuedMethods.Add(action);
-            isFree = false;
-        }
-    }
+            if (instance != null) return;
 
-    void Update()
-    {
-        if (isFree) return;
-
-        cQueuedMethods.Clear(); //Clear previously cached methods
-
-        lock (queuedMethods)
-        {
-            //Cache to new list and free 
-            cQueuedMethods.AddRange(queuedMethods);
-            queuedMethods.Clear();
-            isFree = true;
+            GameObject obj = new GameObject("UnityMainThread");
+            DontDestroyOnLoad(obj);
+            instance = obj.AddComponent<UnityMainThread>();
         }
 
-        for (int i = 0; i < cQueuedMethods.Count; i++)
+        public static void Execute(Action action)
         {
-            cQueuedMethods[i].Invoke();
-        }
-    }
+            if (instance == null) return;
 
-    public void OnDisable()
-    {
-        if (instance == this) instance = null;
+            lock (queuedMethods)
+            {
+                queuedMethods.Add(action);
+                isFree = false;
+            }
+        }
+
+        void Update()
+        {
+            if (isFree) return;
+
+            cQueuedMethods.Clear(); //Clear previously cached methods
+
+            lock (queuedMethods)
+            {
+                //Cache to new list and free 
+                cQueuedMethods.AddRange(queuedMethods);
+                queuedMethods.Clear();
+                isFree = true;
+            }
+
+            for (int i = 0; i < cQueuedMethods.Count; i++)
+            {
+                cQueuedMethods[i].Invoke();
+            }
+        }
+
+        public void OnDisable()
+        {
+            if (instance == this) instance = null;
+        }
     }
 }

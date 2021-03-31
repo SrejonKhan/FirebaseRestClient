@@ -3,15 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace UnityFirebaseREST
+namespace FirebaseRestClient
 {
-
     public class SignInCallback
     {
-        internal Action<SignInResponse> successCallback;
+        internal Action<FirebaseUser> successCallback;
         internal Action<Exception> exceptionCallback;
 
-        public SignInCallback OnSuccess(Action<SignInResponse> callback)
+        public SignInCallback OnSuccess(Action<FirebaseUser> callback)
         {
             successCallback += callback;
             return this;
@@ -35,6 +34,18 @@ namespace UnityFirebaseREST
         public int expiresIn;
 
         public SignInResponse() { }
+
+        internal FirebaseUser ToUser()
+        {
+            var tempUser = new FirebaseUser();
+            tempUser.localId = localId;
+            tempUser.email = email;
+            tempUser.accessToken = idToken;
+            tempUser.refreshToken = refreshToken;
+
+            return tempUser;
+
+        }
     }
 
 }

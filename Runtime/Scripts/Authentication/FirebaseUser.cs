@@ -5,45 +5,68 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace UnityFirebaseREST
+namespace FirebaseRestClient
 {
     public class FirebaseUser
     {
-        private string displayName;
+        internal string displayName;
         public string DisplayName { get => displayName; }
 
-        private string email;
+        internal string email;
         public string Email { get => email; }
 
-        private bool isAnonymous;
+        internal bool isAnonymous = false;
         public bool IsAnonymous { get => isAnonymous; }
 
-        private bool isEmailVerified;
+        internal bool isEmailVerified = true;
         public bool IsEmailVerified { get => isEmailVerified; }
 
-        private string photoUrl;
+        internal string photoUrl;
         public string PhotoUrl { get => photoUrl; }
 
 
-        private string provider;
+        internal string provider;
         public string Provider { get => provider; }
 
-        private string localId;
+        internal string localId;
         public string LocalId { get => localId; }
         
-        private string refreshToken;
-        
+        internal string refreshToken;
+
+        internal string accessToken;
+
+        internal string validSince;
+        internal string lastLoginAt;
+        internal string createdAt;
+        internal string lastRefreshAt;
+        internal bool disabled;
+        internal bool customAuth;
+
+        //Only for internal assembly itself
+        internal FirebaseUser()
+        {
+
+        }
+
+        internal FirebaseUser(string email, string photoUrl, string accessToken, string refreshToken)
+        {
+            this.email = email;
+            this.photoUrl = photoUrl;
+            this.accessToken = accessToken;
+            this.refreshToken = refreshToken;
+        }
+
         public void Delete()
         {
 
         }
 
-        public GetUserCallback GetUser(string idToken)
+        public GetUserCallback Reload()
         {
             GetUserCallback callbackHandler = new GetUserCallback();
 
             string rawBody = "{" +
-            $"\"idToken\":\"{idToken}\"," + //user id token
+            $"\"idToken\":\"{accessToken}\"," + //user id token
             "}";
 
             RequestHelper req = new RequestHelper
@@ -81,12 +104,12 @@ namespace UnityFirebaseREST
             return callbackHandler;
         }
 
-        public ChangeEmailCallback ChangeEmail(string idToken, string newEmail)
+        public ChangeEmailCallback ChangeEmail(string newEmail)
         {
             ChangeEmailCallback callbackHandler = new ChangeEmailCallback();
 
             string rawBody = "{" +
-            $"\"idToken\":\"{idToken}\"," +
+            $"\"idToken\":\"{accessToken}\"," +
             $"\"email\":\"{newEmail}\"," + //user email
             $"\"returnSecureToken\":\"true\"" + //user email
             "}";
@@ -112,12 +135,12 @@ namespace UnityFirebaseREST
             return callbackHandler;
         }
 
-        public ChangePasswordCallback ChangePassword(string idToken, string newPassword)
+        public ChangePasswordCallback ChangePassword(string newPassword)
         {
             ChangePasswordCallback callbackHandler = new ChangePasswordCallback();
 
             string rawBody = "{" +
-            $"\"idToken\":\"{idToken}\"," +
+            $"\"idToken\":\"{accessToken}\"," +
             $"\"password\":\"{newPassword}\"," + //user email
             $"\"returnSecureToken\":\"true\"" + //user email
             "}";
@@ -144,12 +167,12 @@ namespace UnityFirebaseREST
             return callbackHandler;
         }
 
-        public UpdateUserCallback UpdateProfile(string idToken, string displayName, string photoUrl)
+        public UpdateUserCallback UpdateProfile(string displayName, string photoUrl)
         {
             UpdateUserCallback callbackHandler = new UpdateUserCallback();
 
             string rawBody = "{" +
-            $"\"idToken\":\"{idToken}\"," +
+            $"\"idToken\":\"{accessToken}\"," +
             $"\"displayName\":\"{displayName}\"" + //user display name
             $"\"photoUrl\":\"{photoUrl}\"" + //user email
             $"\"returnSecureToken\":\"true\"" + //user email
@@ -167,7 +190,9 @@ namespace UnityFirebaseREST
 
             RESTHelper.Post<UpdateProfileResponse>(req, result =>
             {
-                callbackHandler.successCallback?.Invoke(result);
+                var user = result.ToUser(this);
+
+                callbackHandler.successCallback?.Invoke(user);
             },
             err =>
             {
@@ -178,7 +203,7 @@ namespace UnityFirebaseREST
 
 
 
-        public AccessTokenCallback RefreshAccessToken(string refreshToken)
+        public AccessTokenCallback RefreshAccessToken()
         {
             AccessTokenCallback callbackHandler = new AccessTokenCallback();
 

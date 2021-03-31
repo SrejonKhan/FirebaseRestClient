@@ -4,17 +4,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DeserializerHelper : MonoBehaviour
+namespace FirebaseRestClient
 {
-    public static Dictionary<T1, T2> Deserialize<T1, T2>(string json)
+    public class DeserializerHelper : MonoBehaviour
     {
-        var fsData = fsJsonParser.Parse(json); //in JSON
-        object deserializedRes = null;
+        public static Dictionary<T1, T2> Deserialize<T1, T2>(string json)
+        {
+            var fsData = fsJsonParser.Parse(json); //in JSON
+            object deserializedRes = null;
 
-        fsSerializer serializer = new fsSerializer();
+            fsSerializer serializer = new fsSerializer();
 
             serializer.TryDeserialize(fsData, typeof(Dictionary<T1, T2>), ref deserializedRes).AssertSuccess();
 
-        return (Dictionary<T1, T2>)deserializedRes;
+            return (Dictionary<T1, T2>)deserializedRes;
+        }
     }
 }

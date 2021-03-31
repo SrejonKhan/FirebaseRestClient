@@ -3,14 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace UnityFirebaseREST
+namespace FirebaseRestClient
 {
     public class OAuthSignInCallback
     {
-        internal Action<OAuthSignUpResponse> successCallback;
+        internal Action<FirebaseUser> successCallback;
         internal Action<Exception> exceptionCallback;
 
-        public OAuthSignInCallback OnSuccess(Action<OAuthSignUpResponse> callback)
+        public OAuthSignInCallback OnSuccess(Action<FirebaseUser> callback)
         {
             successCallback += callback;
             return this;
@@ -42,5 +42,20 @@ namespace UnityFirebaseREST
         public string rawUserInfo;
 
         public OAuthSignUpResponse() { }
+
+        internal FirebaseUser ToUser()
+        {
+            var tempUser = new FirebaseUser();
+            tempUser.localId = localId;
+            tempUser.email = email;
+            tempUser.isEmailVerified = emailVerified;
+            tempUser.displayName = displayName;
+            tempUser.photoUrl = photoUrl;
+            tempUser.provider = providerId;
+            tempUser.accessToken = idToken;
+            tempUser.refreshToken = refreshToken;
+
+            return tempUser;
+        }
     }
 }

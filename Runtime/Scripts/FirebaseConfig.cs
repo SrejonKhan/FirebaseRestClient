@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace UnityFirebaseREST
+namespace FirebaseRestClient
 {
     public class FirebaseConfig
     {
@@ -16,7 +16,7 @@ namespace UnityFirebaseREST
         public static string googleClientId = "226705604774-3niu3pa5b3p0dj3bb8u4c82g7kangsrf.apps.googleusercontent.com";
         public static string googleClientSecret = "LKKqLfvPAKpORDbrj_IAwfFv";
 
-        public static string facebookClientId = "766602067617680";
-        public static string facebookClientSecret = "f312b4f85f642b2a566ad512bc01bbec";
+        public static string facebookClientId = "179400513902699";
+        public static string facebookClientSecret = "a47a8db309a4cc5c3cda1f3ec04bc1d4";
     }
 }

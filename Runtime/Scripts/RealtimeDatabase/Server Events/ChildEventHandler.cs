@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using System.Linq;
 
-namespace UnityFirebaseREST
+namespace FirebaseRestClient
 {
     public class ChildEventHandler : DownloadHandlerScript
     {

@@ -7,7 +7,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace UnityFirebaseREST
+namespace FirebaseRestClient
 {
     public class FirebaseAuthREST
     {
@@ -15,15 +15,15 @@ namespace UnityFirebaseREST
         private event EventHandler onStateChanged;
         
         //State Change 
-        public event EventHandler OnStateChanged 
+        public event EventHandler StateChanged 
         {
             add { onStateChanged += value; }
             remove { onStateChanged -= value; }
         }
 
-        private FirebaseUser currentUser;
+        private static FirebaseUser currentUser;
 
-        public FirebaseUser CurrentUser { get => currentUser;  set => currentUser = value; }
+        public FirebaseUser CurrentUser { get => currentUser; }
 
         public FirebaseAuthREST() 
         {
@@ -57,7 +57,15 @@ namespace UnityFirebaseREST
 
             RESTHelper.Post<SignInResponse>(req, res =>
             {
-                callbackHandler.successCallback?.Invoke(res);
+                var user = res.ToUser();
+                user.provider = "password";
+
+                currentUser = user;
+
+                onStateChanged?.Invoke(this, null); //Invoke On State Change Event
+
+                callbackHandler.successCallback?.Invoke(user);
+
             },
             err =>
             {
@@ -87,7 +95,15 @@ namespace UnityFirebaseREST
 
             RESTHelper.Post<SignInResponse>(req, res =>
             {
-                callbackHandler.successCallback?.Invoke(res);
+                var user = res.ToUser();
+                user.provider = "anonymous";
+                user.isAnonymous = true;
+
+                currentUser = user;
+
+                onStateChanged.Invoke(this, null); //Invoke On State Change Event
+
+                callbackHandler.successCallback?.Invoke(user);
             },
             err =>
             {
@@ -122,7 +138,13 @@ namespace UnityFirebaseREST
 
             RESTHelper.Post<OAuthSignUpResponse>(req, res =>
             {
-                callbackHandler.successCallback?.Invoke(res);
+                var user = res.ToUser();
+                //user.provider = providerID;
+
+                currentUser = user;
+                onStateChanged?.Invoke(this, null); //Invoke On State Change Event
+
+                callbackHandler.successCallback?.Invoke(user);
             },
             err =>
             {
@@ -157,7 +179,13 @@ namespace UnityFirebaseREST
 
             RESTHelper.Post<OAuthSignUpResponse>(req, res =>
             {
-                callbackHandler.successCallback?.Invoke(res);
+                var user = res.ToUser();
+                user.provider = providerID;
+
+                currentUser = user;
+                onStateChanged?.Invoke(this, null); //Invoke On State Change Event
+
+                callbackHandler.successCallback?.Invoke(user);
             },
             err =>
             {
@@ -189,7 +217,13 @@ namespace UnityFirebaseREST
 
             RESTHelper.Post<SignUpResponse>(req, res =>
             {
-                callbackHandler.successCallback?.Invoke(res);
+                var user = res.ToUser();
+                user.provider = "password";
+
+                currentUser = user;
+                onStateChanged?.Invoke(this, null); //Invoke On State Change Event
+
+                callbackHandler.successCallback?.Invoke(user);
             },
             err =>
             {
@@ -214,7 +248,6 @@ namespace UnityFirebaseREST
             {
                 var deserializedObj = JsonUtility.FromJson<GoogleIdTokenResponse>(res);
                 SignInWithOAuth(deserializedObj.access_token, "google.com", callbackHandler);
-
             },
             error =>
             {
@@ -233,9 +266,10 @@ namespace UnityFirebaseREST
         {
             OAuthSignInCallback callbackHandler = new OAuthSignInCallback();
 
+
             string url = $"https://graph.facebook.com/v10.0/oauth/access_token?" +
                 $"client_id={FirebaseConfig.facebookClientId}&" +
-                $"redirect_uri=http://localhost:5050&" +
+                $"redirect_uri=http://localhost:5050/&" +
                 $"client_secret={FirebaseConfig.facebookClientSecret}&" +
                 $"code={authCode}";
 
@@ -244,8 +278,8 @@ namespace UnityFirebaseREST
             {
                 Debug.Log(res);
                 var deserializedObj = JsonUtility.FromJson<GoogleIdTokenResponse>(res);
+                Debug.Log(deserializedObj.access_token);
                 SignInWithOAuth(deserializedObj.access_token, "facebook.com", callbackHandler);
-
             },
             error =>
             {
@@ -290,6 +324,11 @@ namespace UnityFirebaseREST
             return callbackHandler;
         }
 
+        public void SignOut() 
+        {
+            currentUser = null;
+            onStateChanged?.Invoke(this, null); //Invoke On State Change Event
+        }
         
     }
 

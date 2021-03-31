@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace UnityFirebaseREST
+namespace FirebaseRestClient
 {
     public class FirebaseREST
     {
@@ -20,12 +20,25 @@ namespace UnityFirebaseREST
         private string endAtValue;
         private string equalToValue;
 
+        public FirebaseREST() { }
+
+        internal FirebaseREST(string path)
+        {
+            this.path = path; 
+        }
+
+
+        internal FirebaseREST(string path, FirebaseFilters filters)
+        {
+            this.path = path;
+            FromFirebaseFilters(filters);
+        }
 
 
         public FirebaseREST Child(string value)
         {
-            path = String.IsNullOrEmpty(path) ? value : $"{path}/{value}";
-            return this;
+            string newPath = String.IsNullOrEmpty(path) ? value : $"{path}/{value}";
+            return new FirebaseREST(newPath, ToFirebaseFilters());
         }
 
 
@@ -39,6 +52,8 @@ namespace UnityFirebaseREST
                 Body = body
             };
 
+
+
             RESTHelper.Put<T>(req, res =>
             {
                 callbackHandler.successCallback?.Invoke();
@@ -50,6 +65,34 @@ namespace UnityFirebaseREST
 
             return callbackHandler;
         }
+
+        public GeneralCallback Write(string key, string value)
+        {
+            GeneralCallback callbackHandler = new GeneralCallback();
+
+            string json = "{" +
+                $"\"{key}\":\"{value}\"" +
+                "}";
+
+            RequestHelper req = new RequestHelper
+            {
+                Uri = FirebaseConfig.endpoint + "/" + path + ".json",
+                BodyString = json
+            };
+
+            RESTHelper.PutJson(req, res =>
+            {
+                callbackHandler.successCallback?.Invoke();
+            },
+            err =>
+            {
+                callbackHandler.exceptionCallback?.Invoke(err);
+            });
+
+            return callbackHandler;
+        }
+
+
 
         public GeneralCallback Write(string json)
         {
@@ -360,31 +403,31 @@ namespace UnityFirebaseREST
         public FirebaseREST LimitToFirst(string value)
         {
             limitToFirstValue = value;
-            return this;
+            return new FirebaseREST(path, ToFirebaseFilters());
         }
 
         public FirebaseREST LimitToLast(string value)
         {
             limitToLastValue = value;
-            return this;
+            return new FirebaseREST(path, ToFirebaseFilters());
         }
 
         public FirebaseREST StartAt(string value)
         {
             startAtValue = value;
-            return this;
+            return new FirebaseREST(path, ToFirebaseFilters());
         }
 
         public FirebaseREST EndAt(string value)
         {
             endAtValue = value;
-            return this;
+            return new FirebaseREST(path, ToFirebaseFilters());
         }
 
         public FirebaseREST EqualTo(string value)
         {
             equalToValue = value;
-            return this;
+            return new FirebaseREST(path, ToFirebaseFilters());
         }
 
         Dictionary<string, string> GetFilterCollection(bool appendQuote)
@@ -409,5 +452,45 @@ namespace UnityFirebaseREST
             return filters;
         }
 
+        FirebaseFilters ToFirebaseFilters()
+        {
+            return new FirebaseFilters
+            {
+                limitToFirstValue = this.limitToFirstValue,
+                limitToLastValue = this.limitToLastValue,
+                startAtValue = this.startAtValue,
+                endAtValue = this.endAtValue,
+                equalToValue = this.equalToValue
+            };
+        }
+
+        void FromFirebaseFilters(FirebaseFilters filters)
+        {
+            limitToFirstValue = filters.limitToFirstValue;
+            limitToLastValue = filters.limitToLastValue;
+            startAtValue = filters.startAtValue;
+            endAtValue = filters.endAtValue;
+            equalToValue = filters.equalToValue;
+        }
+    }
+
+    internal class FirebaseFilters 
+    {
+        internal string limitToFirstValue;
+        internal string limitToLastValue;
+        internal string startAtValue;
+        internal string endAtValue;
+        internal string equalToValue;
+
+        internal FirebaseFilters() { }                
+
+        internal FirebaseFilters(string limitToFirstValue, string limitToLastValue, string startAtValue, string endAtValue, string equalToValue) 
+        {
+            this.limitToFirstValue = limitToFirstValue;
+            this.limitToLastValue = limitToLastValue;
+            this.startAtValue = startAtValue;
+            this.endAtValue = endAtValue;
+            this.equalToValue = equalToValue;
+        }
     }
 }
