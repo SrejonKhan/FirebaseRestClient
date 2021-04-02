@@ -180,6 +180,13 @@ namespace FirebaseRestClient
                 serializer.TryDeserialize(resData, typeof(Dictionary<string, T>), ref deserializedRes);
 
                 Dictionary<string, T> destructuredRes = (Dictionary<string, T>)deserializedRes;
+
+                if (callbackHandler.hasChildCallback != null)
+                {
+                    bool hasChild = destructuredRes.ContainsKey(callbackHandler.hasChildNode);
+                    callbackHandler.hasChildCallback(hasChild);
+                }
+
                 callbackHandler.successCallback?.Invoke(destructuredRes); //UID
             },
             err =>
@@ -207,6 +214,7 @@ namespace FirebaseRestClient
 
             return callbackHandler;
         }
+
 
         public GeneralCallback Update<T>(T body)
         {

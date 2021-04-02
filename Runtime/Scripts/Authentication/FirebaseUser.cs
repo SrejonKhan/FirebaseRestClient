@@ -173,9 +173,9 @@ namespace FirebaseRestClient
 
             string rawBody = "{" +
             $"\"idToken\":\"{accessToken}\"," +
-            $"\"displayName\":\"{displayName}\"" + //user display name
-            $"\"photoUrl\":\"{photoUrl}\"" + //user email
-            $"\"returnSecureToken\":\"true\"" + //user email
+            $"\"displayName\":\"{displayName}\"," + //user display name
+            $"\"photoUrl\":\"{photoUrl}\"," + //user email
+            $"\"returnSecureToken\":\"true\"" + 
             "}";
 
             RequestHelper req = new RequestHelper
