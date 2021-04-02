@@ -12,7 +12,7 @@ namespace FirebaseRestClient
     public class FirebaseREST
     {
         private string path; /// path from root
-        
+
         //Filters
         private string limitToFirstValue;
         private string limitToLastValue;
@@ -24,7 +24,7 @@ namespace FirebaseRestClient
 
         internal FirebaseREST(string path)
         {
-            this.path = path; 
+            this.path = path;
         }
 
 
@@ -163,8 +163,40 @@ namespace FirebaseRestClient
 
             return callbackHandler;
         }
+        public DictionaryCallback<string, string> Read()
+        {
+            DictionaryCallback<string, string> callbackHandler = new DictionaryCallback<string, string>();
 
-        public DictionaryCallback<string,T> Read<T>()
+            string route = FirebaseConfig.endpoint + "/" + path + ".json";
+
+            RESTHelper.Get(route, res =>
+            {
+                var resData = fsJsonParser.Parse(res.Text); //in JSON
+
+                object deserializedRes = null;
+
+                fsSerializer serializer = new fsSerializer();
+                serializer.TryDeserialize(resData, typeof(Dictionary<string, string>), ref deserializedRes);
+
+                Dictionary<string, string> destructuredRes = (Dictionary<string, string>)deserializedRes;
+
+                if (callbackHandler.hasChildCallback != null)
+                {
+                    bool hasChild = destructuredRes.ContainsKey(callbackHandler.hasChildNode);
+                    callbackHandler.hasChildCallback(hasChild);
+                }
+
+                callbackHandler.successCallback?.Invoke(destructuredRes); //UID
+            },
+            err =>
+            {
+                callbackHandler.exceptionCallback?.Invoke(err);
+            });
+
+            return callbackHandler;
+        }
+
+        public DictionaryCallback<string, T> Read<T>()
         {
             DictionaryCallback<string, T> callbackHandler = new DictionaryCallback<string, T>();
 
@@ -215,6 +247,46 @@ namespace FirebaseRestClient
             return callbackHandler;
         }
 
+        public BooleanCallback HasChild(string child)
+        {
+            BooleanCallback callbackHandler = new BooleanCallback();
+
+            string route = FirebaseConfig.endpoint + "/" + path + ".json";
+
+            RESTHelper.Get(route, res =>
+            {
+                var resData = fsJsonParser.Parse(res.Text); //in JSON
+
+                object deserializedRes = null;
+
+                fsSerializer serializer = new fsSerializer();
+
+                var deserializationResult = serializer.TryDeserialize(resData, typeof(Dictionary<string, string>), ref deserializedRes).Succeeded;
+
+                bool hasChild = false;
+
+                if (deserializationResult)
+                {
+                    Dictionary<string, string> destructuredRes = (Dictionary<string, string>)deserializedRes;
+                    hasChild = destructuredRes.ContainsKey(child);
+                }
+                else 
+                {
+                    serializer.TryDeserialize(resData, typeof(Dictionary<string, object>), ref deserializedRes);
+
+                    Dictionary<string, object> destructuredResObj = (Dictionary<string, object>)deserializedRes;
+                    hasChild = destructuredResObj.ContainsKey(child);
+                }
+
+                callbackHandler.successCallback?.Invoke(hasChild); //UID
+            },
+            err =>
+            {
+                callbackHandler.exceptionCallback?.Invoke(err);
+            });
+
+            return callbackHandler;
+        }
 
         public GeneralCallback Update<T>(T body)
         {
@@ -482,7 +554,7 @@ namespace FirebaseRestClient
         }
     }
 
-    internal class FirebaseFilters 
+    internal class FirebaseFilters
     {
         internal string limitToFirstValue;
         internal string limitToLastValue;
@@ -490,9 +562,9 @@ namespace FirebaseRestClient
         internal string endAtValue;
         internal string equalToValue;
 
-        internal FirebaseFilters() { }                
+        internal FirebaseFilters() { }
 
-        internal FirebaseFilters(string limitToFirstValue, string limitToLastValue, string startAtValue, string endAtValue, string equalToValue) 
+        internal FirebaseFilters(string limitToFirstValue, string limitToLastValue, string startAtValue, string endAtValue, string equalToValue)
         {
             this.limitToFirstValue = limitToFirstValue;
             this.limitToLastValue = limitToLastValue;

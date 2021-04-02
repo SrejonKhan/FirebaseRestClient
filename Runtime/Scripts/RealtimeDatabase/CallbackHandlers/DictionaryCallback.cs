@@ -25,12 +25,12 @@ namespace FirebaseRestClient
             return this;
         }
 
-        public DictionaryCallback<T1, T2> HasChild(string child, Action<bool> resultCallback)
-        {
-            hasChildNode = child;
-            hasChildCallback += resultCallback;
-            return this;
-        }
+        //public DictionaryCallback<T1, T2> HasChild(string child, Action<bool> resultCallback)
+        //{
+        //    hasChildNode = child;
+        //    hasChildCallback += resultCallback;
+        //    return this;
+        //}
     }
 
 }

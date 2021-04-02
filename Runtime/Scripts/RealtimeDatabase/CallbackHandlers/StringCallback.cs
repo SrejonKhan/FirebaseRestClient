@@ -21,11 +21,5 @@ namespace FirebaseRestClient
             exceptionCallback += callback;
             return this;
         }
-
-        public StringCallback ToList()
-        {
-            
-            return this;
-        }
     }
 }

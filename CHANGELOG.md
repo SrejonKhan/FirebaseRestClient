@@ -1,21 +1,28 @@
+## [0.5.4] - 02-04-2021
+
+Independant HasChild functionality, read operation is nested and robustness in deserialization.
+
+### Added
+- MIT License added
+
+### Changed
+- Enhanced HasChild Function 
+
 ## [0.5.3] - 02-04-2021
 
 UpdateProfile issue fixed, HasChild function added. 
 
 ### Added
 - HasChild Function
-
-###Fixed 
-- UpdateProfile Json error
-
-
-### Added
 - User object callback
 - StateChanged event
 - SignOut
 - Responses to User Object (Internal Only)
 - Key-Value Pair Writing to Realtime Database
 - Efficient way to assign Filters
+
+### Fixed 
+- UpdateProfile Json error
 
 ### Changed
 - Namespace name changed
