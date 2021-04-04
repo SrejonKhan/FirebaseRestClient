@@ -163,6 +163,8 @@ namespace FirebaseRestClient
 
             return callbackHandler;
         }
+
+
         public DictionaryCallback<string, string> Read()
         {
             DictionaryCallback<string, string> callbackHandler = new DictionaryCallback<string, string>();

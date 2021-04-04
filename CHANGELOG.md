@@ -1,3 +1,13 @@
+## [0.5.5] - 04-04-2021
+
+Send email verfication mail and Minor Fixes. 
+
+### Added
+- Send email verificaiton email
+
+### Fixed 
+- HasChild null reference issue fixed
+
 ## [0.5.4] - 02-04-2021
 
 Independant HasChild functionality, read operation is nested and robustness in deserialization.

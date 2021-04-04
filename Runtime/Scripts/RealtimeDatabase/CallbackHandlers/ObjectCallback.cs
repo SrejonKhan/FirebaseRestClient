@@ -5,21 +5,24 @@ using UnityEngine;
 
 namespace FirebaseRestClient
 {
-    public class BooleanCallback
+    public class ObjectCallback <T1>
     {
-        internal Action<bool> successCallback;
+        internal Action<T1> successCallback;
         internal Action<Exception> exceptionCallback;
 
-        public BooleanCallback OnSuccess(Action<bool> callback)
+        internal string hasChildNode;
+
+        public ObjectCallback<T1> OnSuccess(Action<T1> callback)
         {
             successCallback += callback;
             return this;
         }
 
-        public BooleanCallback OnError(Action<Exception> callback)
+        public ObjectCallback<T1> OnError(Action<Exception> callback)
         {
             exceptionCallback += callback;
             return this;
         }
     }
+
 }

@@ -64,6 +64,8 @@ namespace FirebaseRestClient
 
                 onStateChanged?.Invoke(this, null); //Invoke On State Change Event
 
+                Debug.Log(user.accessToken);
+
                 callbackHandler.successCallback?.Invoke(user);
 
             },
@@ -291,6 +293,41 @@ namespace FirebaseRestClient
                 callbackHandler.exceptionCallback?.Invoke(err);
             });
 
+            return callbackHandler;
+        }
+
+        public GeneralCallback SendEmailVerification()
+        {
+            GeneralCallback callbackHandler = new GeneralCallback();
+
+            if (currentUser == null)
+            {
+                return callbackHandler;
+            }
+
+            string rawBody = "{" +
+            $"\"requestType\":\"VERIFY_EMAIL\"," +
+            $"\"idToken\":\"{currentUser.accessToken}\"" + //user email
+            "}";
+
+            RequestHelper req = new RequestHelper
+            {
+                Uri = "https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode",
+                Params = new Dictionary<string, string>
+                    {
+                        {"key",  FirebaseConfig.api}
+                    },
+                BodyString = rawBody
+            };
+
+            RESTHelper.Post(req, result =>
+            {
+                callbackHandler.successCallback?.Invoke();
+            },
+            err =>
+            {
+                callbackHandler.exceptionCallback?.Invoke(err);
+            });
             return callbackHandler;
         }
 
