@@ -361,6 +361,40 @@ namespace FirebaseRestClient
             return callbackHandler;
         }
 
+        public ObjectCallback<EmailProviderResponse> FetchProvidersForEmail(string email)
+        {
+            ObjectCallback<EmailProviderResponse> callbackHandler = new ObjectCallback<EmailProviderResponse>();
+
+            string rawBody = "{" +
+            $"\"identifier\":\"{email}\"," +
+            $"\"continueUri\":\"http://localhost:5050\"" + //user email
+            "}";
+
+            RequestHelper req = new RequestHelper
+            {
+                Uri = "https://identitytoolkit.googleapis.com/v1/accounts:createAuthUri",
+                Params = new Dictionary<string, string>
+                    {
+                        {"key",  FirebaseConfig.api}
+                    },
+                BodyString = rawBody
+            };
+
+            RESTHelper.Post(req, result =>
+            {
+                EmailProviderResponse emailProviderResponse = JsonUtility.FromJson<EmailProviderResponse>(result);
+
+                callbackHandler.successCallback?.Invoke(emailProviderResponse);
+            },
+            err =>
+            {
+                callbackHandler.exceptionCallback?.Invoke(err);
+            });
+
+            return callbackHandler;
+
+        }
+
         public void SignOut() 
         {
             currentUser = null;
@@ -376,6 +410,4 @@ namespace FirebaseRestClient
         public string email;
         public string rawId;
     }
-
-
 }

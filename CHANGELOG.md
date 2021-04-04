@@ -1,3 +1,10 @@
+## [0.5.6] - 04-04-2021
+
+FetchProvidersForEmail added. 
+
+### Added
+- FetchProvidersForEmail added in Authentication
+
 ## [0.5.5] - 04-04-2021
 
 Send email verfication mail and Minor Fixes. 
