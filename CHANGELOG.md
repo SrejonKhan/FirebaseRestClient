@@ -1,3 +1,11 @@
+## [0.5.7] - 05-04-2021
+
+Raw Json Push function added, WriteAppend function added for key-value pair collection.
+
+### Added
+- Raw Json Push in Realtime Database
+- WriteAppend function in Realtime Databe
+
 ## [0.5.6] - 04-04-2021
 
 FetchProvidersForEmail added. 

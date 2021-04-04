@@ -66,6 +66,28 @@ namespace FirebaseRestClient
             return callbackHandler;
         }
 
+        public GeneralCallback Write(string json)
+        {
+            GeneralCallback callbackHandler = new GeneralCallback();
+
+            RequestHelper req = new RequestHelper
+            {
+                Uri = FirebaseConfig.endpoint + "/" + path + ".json",
+                BodyString = json
+            };
+
+            RESTHelper.PutJson(req, res =>
+            {
+                callbackHandler.successCallback?.Invoke();
+            },
+            err =>
+            {
+                callbackHandler.exceptionCallback?.Invoke(err);
+            });
+
+            return callbackHandler;
+        }
+
         public GeneralCallback Write(string key, string value)
         {
             GeneralCallback callbackHandler = new GeneralCallback();
@@ -92,11 +114,13 @@ namespace FirebaseRestClient
             return callbackHandler;
         }
 
-
-
-        public GeneralCallback Write(string json)
+        public GeneralCallback WriteAppend(string key, string value)
         {
             GeneralCallback callbackHandler = new GeneralCallback();
+
+            string json = "{" +
+                $"\"{key}\":\"{value}\"" +
+                "}";
 
             RequestHelper req = new RequestHelper
             {
@@ -104,7 +128,7 @@ namespace FirebaseRestClient
                 BodyString = json
             };
 
-            RESTHelper.PutJson(req, res =>
+            RESTHelper.Patch(req, res =>
             {
                 callbackHandler.successCallback?.Invoke();
             },
@@ -116,6 +140,34 @@ namespace FirebaseRestClient
             return callbackHandler;
         }
 
+        public StringCallback Push(string json)
+        {
+            StringCallback callbackHandler = new StringCallback();
+
+            RequestHelper req = new RequestHelper
+            {
+                Uri = FirebaseConfig.endpoint + "/" + path + ".json",
+                BodyString = json
+            };
+
+            RESTHelper.Post(req, res =>
+            {
+                var resData = fsJsonParser.Parse(res); //in JSON
+                object deserializedRes = null;
+
+                fsSerializer serializer = new fsSerializer();
+                serializer.TryDeserialize(resData, typeof(Dictionary<string, string>), ref deserializedRes);
+
+                Dictionary<string, string> destructuredRes = (Dictionary<string, string>)deserializedRes;
+                callbackHandler.successCallback?.Invoke(destructuredRes["name"]); //UID
+            },
+            err =>
+            {
+                callbackHandler.exceptionCallback?.Invoke(err);
+            });
+
+            return callbackHandler;
+        }
 
         public StringCallback Push<T>(T body)
         {
