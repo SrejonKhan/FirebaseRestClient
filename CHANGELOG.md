@@ -1,3 +1,10 @@
+## [0.5.9] - 05-04-2021
+
+New Read Function to return object itself converted from Json response. 
+
+### Added
+- New Read Function in Realtime Database
+
 ## [0.5.8] - 05-04-2021
 
 Local PushID generation, Push function updated according to Push ID Generation.
