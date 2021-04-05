@@ -1,3 +1,10 @@
+## [0.5.8] - 05-04-2021
+
+Local PushID generation, Push function updated according to Push ID Generation.
+
+### Added 
+- Local PushID Generation
+
 ## [0.5.7] - 05-04-2021
 
 Raw Json Push function added, WriteAppend function added for key-value pair collection.

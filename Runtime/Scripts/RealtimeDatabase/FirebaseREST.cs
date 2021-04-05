@@ -140,26 +140,31 @@ namespace FirebaseRestClient
             return callbackHandler;
         }
 
+        public string GeneratePushID()
+        {
+            return FirebasePushIDGenerator.GeneratePushID();
+        }
+
+        public long ConvertPushID(string pushId)
+        {
+            return FirebasePushIDGenerator.ConvertPushID(pushId);   
+        }
+
         public StringCallback Push(string json)
         {
             StringCallback callbackHandler = new StringCallback();
 
+            string uid = GeneratePushID();
+
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.endpoint + "/" + path + ".json",
+                Uri = FirebaseConfig.endpoint + "/" + path + "/" + uid + ".json",
                 BodyString = json
             };
 
-            RESTHelper.Post(req, res =>
+            RESTHelper.PutJson(req, res =>
             {
-                var resData = fsJsonParser.Parse(res); //in JSON
-                object deserializedRes = null;
-
-                fsSerializer serializer = new fsSerializer();
-                serializer.TryDeserialize(resData, typeof(Dictionary<string, string>), ref deserializedRes);
-
-                Dictionary<string, string> destructuredRes = (Dictionary<string, string>)deserializedRes;
-                callbackHandler.successCallback?.Invoke(destructuredRes["name"]); //UID
+                callbackHandler.successCallback?.Invoke(uid); //UID
             },
             err =>
             {
@@ -173,22 +178,17 @@ namespace FirebaseRestClient
         {
             StringCallback callbackHandler = new StringCallback();
 
+            string uid = GeneratePushID();
+
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.endpoint + "/" + path + ".json",
+                Uri = FirebaseConfig.endpoint + "/" + path + "/" + uid + ".json",
                 Body = body
             };
 
-            RESTHelper.Post(req, res =>
+            RESTHelper.Put<T>(req, res =>
             {
-                var resData = fsJsonParser.Parse(res); //in JSON
-                object deserializedRes = null;
-
-                fsSerializer serializer = new fsSerializer();
-                serializer.TryDeserialize(resData, typeof(Dictionary<string, string>), ref deserializedRes);
-
-                Dictionary<string, string> destructuredRes = (Dictionary<string, string>)deserializedRes;
-                callbackHandler.successCallback?.Invoke(destructuredRes["name"]); //UID
+                callbackHandler.successCallback?.Invoke(uid); //UID
             },
             err =>
             {
@@ -234,12 +234,6 @@ namespace FirebaseRestClient
 
                 Dictionary<string, string> destructuredRes = (Dictionary<string, string>)deserializedRes;
 
-                if (callbackHandler.hasChildCallback != null)
-                {
-                    bool hasChild = destructuredRes.ContainsKey(callbackHandler.hasChildNode);
-                    callbackHandler.hasChildCallback(hasChild);
-                }
-
                 callbackHandler.successCallback?.Invoke(destructuredRes); //UID
             },
             err =>
@@ -266,12 +260,6 @@ namespace FirebaseRestClient
                 serializer.TryDeserialize(resData, typeof(Dictionary<string, T>), ref deserializedRes);
 
                 Dictionary<string, T> destructuredRes = (Dictionary<string, T>)deserializedRes;
-
-                if (callbackHandler.hasChildCallback != null)
-                {
-                    bool hasChild = destructuredRes.ContainsKey(callbackHandler.hasChildNode);
-                    callbackHandler.hasChildCallback(hasChild);
-                }
 
                 callbackHandler.successCallback?.Invoke(destructuredRes); //UID
             },

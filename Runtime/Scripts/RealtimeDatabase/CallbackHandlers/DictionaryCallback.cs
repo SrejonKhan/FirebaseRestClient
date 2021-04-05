@@ -9,9 +9,7 @@ namespace FirebaseRestClient
     {
         internal Action<Dictionary<T1, T2>> successCallback;
         internal Action<Exception> exceptionCallback;
-        internal Action<bool> hasChildCallback;
 
-        internal string hasChildNode;
 
         public DictionaryCallback<T1, T2> OnSuccess(Action<Dictionary<T1, T2>> callback)
         {
