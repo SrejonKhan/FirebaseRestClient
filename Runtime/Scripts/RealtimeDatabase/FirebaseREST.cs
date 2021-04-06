@@ -271,25 +271,6 @@ namespace FirebaseRestClient
             return callbackHandler;
         }
 
-        public ObjectCallback<T> Read<T>(T obj)
-        {
-            ObjectCallback<T> callbackHandler = new ObjectCallback<T>();
-
-            string route = FirebaseConfig.endpoint + "/" + path + ".json";
-
-            RESTHelper.Get(route, res =>
-            {
-                T serializedObj = JsonUtility.FromJson<T>(res.Text); 
-                callbackHandler.successCallback?.Invoke(serializedObj); //in JSON
-            },
-            err =>
-            {
-                callbackHandler.exceptionCallback?.Invoke(err);
-            });
-
-            return callbackHandler;
-        }
-
         public StringCallback RawRead()
         {
             StringCallback callbackHandler = new StringCallback();

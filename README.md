@@ -28,7 +28,43 @@ This library is so far supporting Realtime Database, Authentication from Firebas
 - Google OAuth Desktop Flow (Loopback)
 - Auth Profile Actions (Display Name, Photo URL)
 
+### Firebase Storage
+- Upload File
+
+```csharp
+//reference
+var firebaseStorage = new FirebaseStorage();        
+
+//Upload from direct filepath
+string filePath = @"D:\Download\audacity-win-2.4.2.exe";
+
+firebaseStorage.Upload(filePath, "File_From_File_Path_Array", progress => 
+{ 
+    Debug.Log(progress); 
+}).
+OnSuccess(res => 
+{
+    //res = UploadResponse
+    Debug.Log(res.downloadUrl);
+}).
+OnError(err => Debug.LogError(err.Message));
+
+//Upload from byte array
+byte[] data = File.ReadAllBytes(filePath);
+
+firebaseStorage.Upload(data, "File_From_Byte_Array", progress => 
+{ 
+    Debug.Log(progress); 
+}).
+OnSuccess(res => 
+{
+    //res = UploadResponse
+    Debug.Log(res.downloadUrl);
+});
+```
 More Features are being added on regular basis.
+
+
 
 # Installation
 

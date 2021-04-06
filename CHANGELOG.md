@@ -1,3 +1,10 @@
+## [0.6.0] - 06-04-2021
+
+Support for Firebase Storage added
+
+### Added
+- Upload file to Firebase Storage
+
 ## [0.5.9] - 05-04-2021
 
 New Read Function to return object itself converted from Json response. 

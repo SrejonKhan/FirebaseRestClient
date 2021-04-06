@@ -18,5 +18,7 @@ namespace FirebaseRestClient
 
         public static string facebookClientId = "179400513902699";
         public static string facebookClientSecret = "a47a8db309a4cc5c3cda1f3ec04bc1d4";
+
+        public static string storageEndpoint = "https://firebasestorage.googleapis.com/v0/b/unityrestfirebase.appspot.com/o";
     }
 }
