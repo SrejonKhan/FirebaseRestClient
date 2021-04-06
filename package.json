@@ -1,0 +1,28 @@
+{
+  "name": "com.srejonkhan.firebase-rest-client",
+  "version": "0.6.0",
+  "displayName": "Firebase Rest Client",
+  "description": "Lightweight Firebase Rest Client to implement Firebase to any Project without importing any Firebase SDK. This Library comes with all major features of Firebase SDK, including Realtime Database, Authentication and others are coming soon.",
+  "unity": "2018.3",
+  "keywords": [
+    "firebase",
+    "firebase rest",
+    "firebase client",
+    "firebase sdk",
+    "rest api",
+    "firebase rest api",
+    "easy firebase",
+    "firebase auth",
+    "firebase authentication",
+    "realtime database",
+    "database sdk",
+    "rest database",
+    "srejon khan"
+  ],
+  "author": {
+    "name": "Srejon Khan",
+    "email": "srejonkhan9@gmail.com",
+    "url": "https://srejonkhan.github.io/"
+  },
+  "type": "library"
+}
