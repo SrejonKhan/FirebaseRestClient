@@ -68,11 +68,8 @@ namespace FirebaseRestClient
             RESTHelper.Post(req, res =>
             {
                 UploadResponse uploadResponse = JsonUtility.FromJson<UploadResponse>(res);
-<<<<<<< HEAD
+
                 uploadResponse.downloadUrl = $"{FirebaseConfig.storageEndpoint}/{uploadResponse.name.Replace("/","%2F")}?alt=media&token={uploadResponse.downloadTokens}";
-=======
-                uploadResponse.downloadUrl = $"{FirebaseConfig.storageEndpoint}/{uploadResponse.name}?alt=media&token={uploadResponse.downloadTokens}";
->>>>>>> df08b19f821e257b9236010c4cc6ea0143d0b2a8
 
                 callbackHandler.successCallback?.Invoke(uploadResponse);
             },
@@ -112,7 +109,11 @@ namespace FirebaseRestClient
             {
                 UploadResponse uploadResponse = JsonUtility.FromJson<UploadResponse>(res);
 <<<<<<< HEAD
+<<<<<<< HEAD
                 uploadResponse.downloadUrl = $"{FirebaseConfig.storageEndpoint}{uploadResponse.name.Replace("/","%2F")}?alt=media&token={uploadResponse.downloadTokens}";
+=======
+                uploadResponse.downloadUrl = $"{FirebaseConfig.storageEndpoint}{uploadResponse.name}?alt=media&token={uploadResponse.downloadTokens}";
+>>>>>>> df08b19f821e257b9236010c4cc6ea0143d0b2a8
 =======
                 uploadResponse.downloadUrl = $"{FirebaseConfig.storageEndpoint}{uploadResponse.name}?alt=media&token={uploadResponse.downloadTokens}";
 >>>>>>> df08b19f821e257b9236010c4cc6ea0143d0b2a8
