@@ -1,4 +1,4 @@
-## [0.6.1] - 06-04-2021
+## [0.6.1] - 07-04-2021
 
 Storage upload respose download url fixed
 
