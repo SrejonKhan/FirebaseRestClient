@@ -29,20 +29,21 @@ This library is so far supporting Realtime Database, Authentication from Firebas
 - Auth Profile Actions (Display Name, Photo URL)
 
 ### Firebase Storage
+
 - Upload File
 
 ```csharp
 //reference
-var firebaseStorage = new FirebaseStorage();        
+var firebaseStorage = new FirebaseStorage();
 
 //Upload from direct filepath
 string filePath = @"D:\Download\audacity-win-2.4.2.exe";
 
-firebaseStorage.Upload(filePath, "File_From_File_Path_Array", progress => 
-{ 
-    Debug.Log(progress); 
+firebaseStorage.Upload(filePath, "File_From_File_Path_Array", progress =>
+{
+    Debug.Log(progress);
 }).
-OnSuccess(res => 
+OnSuccess(res =>
 {
     //res = UploadResponse
     Debug.Log(res.downloadUrl);
@@ -52,25 +53,30 @@ OnError(err => Debug.LogError(err.Message));
 //Upload from byte array
 byte[] data = File.ReadAllBytes(filePath);
 
-firebaseStorage.Upload(data, "File_From_Byte_Array", progress => 
-{ 
-    Debug.Log(progress); 
+firebaseStorage.Upload(data, "File_From_Byte_Array", progress =>
+{
+    Debug.Log(progress);
 }).
-OnSuccess(res => 
+OnSuccess(res =>
 {
     //res = UploadResponse
     Debug.Log(res.downloadUrl);
 });
 ```
+
 More Features are being added on regular basis.
-
-
 
 # Installation
 
 Open Package Manager in Unity and Click on Plus Icon -> Add package from git URL, paste following link `https://github.com/SrejonKhan/FirebaseRestClient.git` and click Add.
 
 Other methods (Asset Store, UPM, Release Page) will be added later after a stable release.
+
+After importing to your project, \*\*Open Settings from (Edit -> Project Settings -> Firebase Rest Client) and set all required credentials.
+
+<p align="center">
+  <img width="80%" src="Documentation/configuration.png">
+</p>
 
 # Documentation
 

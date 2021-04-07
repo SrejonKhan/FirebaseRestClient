@@ -1,3 +1,10 @@
+## [0.6.2] - 08-04-2021
+
+All configuration is now directly editable from Project Settings and save all settings inside resource to load in runtime. 
+
+### Added
+- Configuration migrated to ScriptableObject
+- Configuration edit from Project Settings
 ## [0.6.1] - 07-04-2021
 
 Storage upload respose download url fixed

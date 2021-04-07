@@ -13,7 +13,10 @@ namespace FirebaseRestClient
         private UploadCallback callbackHandler;
         private Action<float> uploadProgressCallback;
 
-        public FirebaseStorage() { }
+        public FirebaseStorage() 
+        {
+            FirebaseSettings.LoadSettings();
+        }
 
         internal FirebaseStorage(string path)
         {

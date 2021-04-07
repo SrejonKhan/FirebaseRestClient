@@ -20,7 +20,10 @@ namespace FirebaseRestClient
         private string endAtValue;
         private string equalToValue;
 
-        public FirebaseREST() { }
+        public FirebaseREST() 
+        {
+            FirebaseSettings.LoadSettings();
+        }
 
         internal FirebaseREST(string path)
         {

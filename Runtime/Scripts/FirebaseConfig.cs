@@ -4,21 +4,21 @@ using UnityEngine;
 
 namespace FirebaseRestClient
 {
-    public class FirebaseConfig
+    internal static class FirebaseConfig
     {
         //Firebase endpoint
-        public static string endpoint = "https://unityrestfirebase-default-rtdb.firebaseio.com";
-        
+        internal static string endpoint = "";
+
         //Authentication
-        public static string api = "AIzaSyATS__kbK_Wtxg2u_lT4kqtTU5bMsJfGbY";
-        public static string authEndpoint = "https://identitytoolkit.googleapis.com/v1/accounts";
+        internal static string api = "";
 
-        public static string googleClientId = "226705604774-3niu3pa5b3p0dj3bb8u4c82g7kangsrf.apps.googleusercontent.com";
-        public static string googleClientSecret = "LKKqLfvPAKpORDbrj_IAwfFv";
+        internal static string storageEndpoint = "";
 
-        public static string facebookClientId = "179400513902699";
-        public static string facebookClientSecret = "a47a8db309a4cc5c3cda1f3ec04bc1d4";
+        internal static string googleClientId = "";
+        internal static string googleClientSecret = "";
 
-        public static string storageEndpoint = "https://firebasestorage.googleapis.com/v0/b/unityrestfirebase.appspot.com/o";
+        internal static string facebookClientId = "";
+        internal static string facebookClientSecret = "";
+
     }
 }

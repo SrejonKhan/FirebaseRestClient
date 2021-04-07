@@ -1,0 +1,17 @@
+{
+    "name": "FirebaseRestClient.Editor",
+    "references": [
+        "GUID:3e3ceb15fc97715429bbf87fa32c6f43"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

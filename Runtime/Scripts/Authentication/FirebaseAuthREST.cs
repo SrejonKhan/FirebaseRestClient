@@ -27,7 +27,7 @@ namespace FirebaseRestClient
 
         public FirebaseAuthREST() 
         {
-
+            FirebaseSettings.LoadSettings();
         }
 
         internal void UpdateCurrentUser() 
@@ -47,7 +47,7 @@ namespace FirebaseRestClient
 
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.authEndpoint + ":signInWithPassword",
+                Uri = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword",
                 Params = new Dictionary<string, string>
                     {
                         {"key",  FirebaseConfig.api}
@@ -87,7 +87,7 @@ namespace FirebaseRestClient
 
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.authEndpoint + ":signUp",
+                Uri = "https://identitytoolkit.googleapis.com/v1/accounts:signUp",
                 Params = new Dictionary<string, string>
                     {
                         {"key",  FirebaseConfig.api}
@@ -130,7 +130,7 @@ namespace FirebaseRestClient
 
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.authEndpoint + ":signInWithIdp",
+                Uri = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp",
                 Params = new Dictionary<string, string>
                     {
                         {"key",  FirebaseConfig.api}
@@ -171,7 +171,7 @@ namespace FirebaseRestClient
 
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.authEndpoint + ":signInWithIdp",
+                Uri = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp",
                 Params = new Dictionary<string, string>
                     {
                         {"key",  FirebaseConfig.api}
@@ -209,7 +209,7 @@ namespace FirebaseRestClient
 
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.authEndpoint + ":signUp",
+                Uri = "https://identitytoolkit.googleapis.com/v1/accounts:signUp",
                 Params = new Dictionary<string, string>
                     {
                         {"key",  FirebaseConfig.api}
