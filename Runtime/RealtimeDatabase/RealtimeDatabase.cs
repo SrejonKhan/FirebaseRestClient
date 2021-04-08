@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace FirebaseRestClient
 {
-    public class FirebaseREST
+    public class RealtimeDatabase
     {
         private string path; /// path from root
 
@@ -20,28 +20,28 @@ namespace FirebaseRestClient
         private string endAtValue;
         private string equalToValue;
 
-        public FirebaseREST() 
+        public RealtimeDatabase() 
         {
             FirebaseSettings.LoadSettings();
         }
 
-        internal FirebaseREST(string path)
+        internal RealtimeDatabase(string path)
         {
             this.path = path;
         }
 
 
-        internal FirebaseREST(string path, FirebaseFilters filters)
+        internal RealtimeDatabase(string path, FirebaseFilters filters)
         {
             this.path = path;
             FromFirebaseFilters(filters);
         }
 
 
-        public FirebaseREST Child(string value)
+        public RealtimeDatabase Child(string value)
         {
             string newPath = String.IsNullOrEmpty(path) ? value : $"{path}/{value}";
-            return new FirebaseREST(newPath, ToFirebaseFilters());
+            return new RealtimeDatabase(newPath, ToFirebaseFilters());
         }
 
 
@@ -145,12 +145,12 @@ namespace FirebaseRestClient
 
         public string GeneratePushID()
         {
-            return FirebasePushIDGenerator.GeneratePushID();
+            return PushIDGenerator.GeneratePushID();
         }
 
         public long ConvertPushID(string pushId)
         {
-            return FirebasePushIDGenerator.ConvertPushID(pushId);   
+            return PushIDGenerator.ConvertPushID(pushId);   
         }
 
         public StringCallback Push(string json)
@@ -427,7 +427,7 @@ namespace FirebaseRestClient
             };
 
             GameObject go = new GameObject("FirebaseRestUnsubscriber");
-            go.AddComponent<Unsubscriber>().requestHelper = req;
+            go.AddComponent<EventUnsubscriber>().requestHelper = req;
             MonoBehaviour.DontDestroyOnLoad(go);
 
             //Error handling are being handled internally
@@ -525,34 +525,34 @@ namespace FirebaseRestClient
         }
 
 
-        public FirebaseREST LimitToFirst(string value)
+        public RealtimeDatabase LimitToFirst(string value)
         {
             limitToFirstValue = value;
-            return new FirebaseREST(path, ToFirebaseFilters());
+            return new RealtimeDatabase(path, ToFirebaseFilters());
         }
 
-        public FirebaseREST LimitToLast(string value)
+        public RealtimeDatabase LimitToLast(string value)
         {
             limitToLastValue = value;
-            return new FirebaseREST(path, ToFirebaseFilters());
+            return new RealtimeDatabase(path, ToFirebaseFilters());
         }
 
-        public FirebaseREST StartAt(string value)
+        public RealtimeDatabase StartAt(string value)
         {
             startAtValue = value;
-            return new FirebaseREST(path, ToFirebaseFilters());
+            return new RealtimeDatabase(path, ToFirebaseFilters());
         }
 
-        public FirebaseREST EndAt(string value)
+        public RealtimeDatabase EndAt(string value)
         {
             endAtValue = value;
-            return new FirebaseREST(path, ToFirebaseFilters());
+            return new RealtimeDatabase(path, ToFirebaseFilters());
         }
 
-        public FirebaseREST EqualTo(string value)
+        public RealtimeDatabase EqualTo(string value)
         {
             equalToValue = value;
-            return new FirebaseREST(path, ToFirebaseFilters());
+            return new RealtimeDatabase(path, ToFirebaseFilters());
         }
 
         Dictionary<string, string> GetFilterCollection(bool appendQuote)

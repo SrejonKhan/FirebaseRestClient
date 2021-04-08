@@ -9,7 +9,7 @@ using UnityEngine.Networking;
 
 namespace FirebaseRestClient
 {
-    public class FirebaseAuthREST
+    public class FirebaseAuthentication
     {
         //private delegate void StateChangedDelegate();
         private event EventHandler onStateChanged;
@@ -25,7 +25,7 @@ namespace FirebaseRestClient
 
         public FirebaseUser CurrentUser { get => currentUser; }
 
-        public FirebaseAuthREST() 
+        public FirebaseAuthentication() 
         {
             FirebaseSettings.LoadSettings();
         }

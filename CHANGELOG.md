@@ -1,3 +1,14 @@
+## [0.6.3] - 08-04-2021
+
+Core classes name changed to more meaningfull name. 
+
+### Changed
+- Core class name changed
+- Readme updated
+
+### Added
+- Upload Function overloaded with no progress params (Storage)
+
 ## [0.6.2] - 08-04-2021
 
 All configuration is now directly editable from Project Settings and save all settings inside resource to load in runtime. 
@@ -5,6 +16,7 @@ All configuration is now directly editable from Project Settings and save all se
 ### Added
 - Configuration migrated to ScriptableObject
 - Configuration edit from Project Settings
+
 ## [0.6.1] - 07-04-2021
 
 Storage upload respose download url fixed

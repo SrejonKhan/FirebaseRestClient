@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace FirebaseRestClient 
 {
-    internal class FirebasePushIDGenerator
+    internal class PushIDGenerator
     {
         /**
         * Fancy ID generator that creates 20-character string identifiers with the following properties:

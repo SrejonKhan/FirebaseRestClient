@@ -40,11 +40,33 @@ namespace FirebaseRestClient
             return callbackHandler;
         }
 
+        public UploadCallback Upload(string filePath, string name)
+        {
+            callbackHandler = new UploadCallback();
+
+            uploadProgressCallback = null;
+
+            StaticCoroutine.StartCoroutine(UploadFile(filePath, name));
+
+            return callbackHandler;
+        }
+
         public UploadCallback Upload(byte[] data, string name, Action<float> progressCallback)
         {
             callbackHandler = new UploadCallback();
 
             uploadProgressCallback = progressCallback;
+
+            StaticCoroutine.StartCoroutine(UploadFile(data, name));
+
+            return callbackHandler;
+        }
+
+        public UploadCallback Upload(byte[] data, string name)
+        {
+            callbackHandler = new UploadCallback();
+
+            uploadProgressCallback = null;
 
             StaticCoroutine.StartCoroutine(UploadFile(data, name));
 

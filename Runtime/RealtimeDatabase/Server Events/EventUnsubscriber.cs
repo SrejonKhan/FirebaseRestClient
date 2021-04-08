@@ -5,7 +5,7 @@ using Proyecto26;
 
 namespace FirebaseRestClient
 {
-    public class Unsubscriber : MonoBehaviour
+    public class EventUnsubscriber : MonoBehaviour
     {
         internal RequestHelper requestHelper;
         internal void AddToUnsubscriber(RequestHelper requestHelper)
@@ -15,7 +15,7 @@ namespace FirebaseRestClient
 
         void OnDisable()
         {
-            Debug.Log("Unsubscribed");
+            Debug.Log("Unsubscribed all Firebase Events");
             requestHelper?.Abort();
         }
     }

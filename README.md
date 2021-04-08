@@ -4,6 +4,18 @@ Lightweight Firebase Library, made on top of REST API.
 
 Implement Firebase to any Project without importing any Firebase SDK. This Library comes with all major features of Firebase SDK, including Realtime Database, Authentication and others are coming soon.
 
+# Installation
+
+Open Package Manager in Unity and Click on Plus Icon -> Add package from git URL, paste following link `https://github.com/SrejonKhan/FirebaseRestClient.git` and click Add.
+
+Other methods (Asset Store, UPM, Release Page) will be added later after a stable release.
+
+After importing to your project, **Open Settings from (Edit -> Project Settings -> Firebase Rest Client) and set all required credentials.**
+
+<p align="center">
+  <img width="100%" src="Documentation/configuration_snap.png">
+</p>
+
 # Features
 
 This library is so far supporting Realtime Database, Authentication from Firebase. Planning to add more support in future.
@@ -11,22 +23,218 @@ This library is so far supporting Realtime Database, Authentication from Firebas
 ### Realtime Database
 
 - Read
-- RawRead (In Json Format)
-- Write (Object, Key-Value, Raw Json)
+- RawRead (Json Format)
+- Push
+- Write
 - Update
 - Remove
-- Child Events (ValueChanged, ChildAdded, ChildRemoved, ChildChanged)
-- Ordering (Key, Value, Child)
-- Filtering (StartAt, EndAt, EqualTo, LimitTo)
+- Child Events
+  - OnValueChanged
+  - OnChildAdded
+  - OnChildRemoved
+  - OnChildChanged
+- Ordering
+  - Order by Key
+  - Order by Value
+  - Order by Child value
+- Filtering
+  - StartAt
+  - EndAt
+  - EqualTo
+  - LimitTo
+- Locally generate Push ID
+
+```csharp
+var firebase = new RealtimeDatabase();
+
+/* -- Read -- */
+
+firebase.Child("users").Read<User>().OnSuccess(result =>
+{
+    //Returns result in Dictionary<string,User> (Dictionary<string,T>)
+    //item.value.id is a property of user class
+    foreach (var item in result)
+        Debug.Log($"Key: {item.Key} - Value: {item.Value.id}\n");
+}).
+OnError(error =>
+{
+    Debug.LogError(error.Message);
+});
+
+firebase.Child("scores").Read().OnSuccess(result =>
+{
+    //Returns result in Dictionary<string,string>
+    foreach (var item in result)
+        Debug.Log($"Name: {item.Key} - score: {item.Value}\n");
+});
+
+firebase.Child("product").Child("orange").RawRead().OnSuccess(result =>
+{
+    //Returns result in Json string
+    Debug.Log(result);
+});
+
+
+
+
+/* -- Push -- */
+/*
+ * Push functionality in this library is a bit different from actual Firebase SDK
+ *
+ * In this library, when Push() function called, it implicitly complete followings task -
+ * 1. Generate a Push ID locally
+ * 2. Write passed body to following path (childs + push id)
+ * 3. Returns generated Push ID as string
+ *
+ * If you just want a Push ID, not directly writing,
+ * you can call firebase.GeneratePushID(), which returns push id in string format.
+*/
+
+firebase.Child("users").Push(anyObject).OnSuccess(uid =>
+{
+    //Returns Push ID in string
+    Debug.Log(uid);
+});
+
+firebase.Child("users").Push(jsonString).OnSuccess(uid =>
+{
+    //Returns Push ID in string
+    Debug.Log(uid);
+});
+
+
+
+
+/* -- Write -- */
+
+// Object as payload
+firebase.Child("product").Child("orange").Write(anyObject).OnSuccess( () =>
+{
+    Debug.Log("Successfully written.");
+});
+
+// Key and Value Pair, suitable for key-value pair leaderboard or similar.
+firebase.Child("leaderboard").Write("player123", "123");
+
+// Json string as Payload
+firebase.Child("product").Child("orange").Write(jsonString);
+
+
+
+
+/* -- Update -- */
+
+// Object as payload
+firebase.Child("users").Child("123").Update(user).OnSuccess( () => { /*...Codes...*/ });
+
+// Json string as payload
+firebase.Child("users").Child("123").Update(jsonString);
+
+
+
+/* -- Remove -- */
+
+firebase.Child("product").Child("orange").Remove().OnSuccess( () => { /*...Codes...*/ });
+
+firebase.Child("product").Child("orange").Remove();
+
+
+
+/* -- Order -- */
+/*
+ * Order functions return a Json String.
+ *
+ * Remember, returned JSON isn't in order, as JSON interpreters don't enforce any ordering.
+ *
+ * Same applies to any filtered result.
+ *
+ * If you want to order, you have to order itself in application.
+ * I'm planning to write a helper function to order json in future updates.
+*/
+
+
+firebase.Child("users").OrderByKey().OnSuccess(json =>
+{
+    //returns json string
+});
+
+firebase.Child("leaderboard").OrderByValue().OnSuccess(json =>
+{
+    //returns json string
+});
+
+firebase.Child("users").OrderByChild("id").OnSuccess(json =>
+{
+    //returns json string
+});
+
+
+/* -- Order with Filters -- */
+/*
+ * Things to remember while filtering -
+ *  1. Filter functions come before Order function. E.g StartAt("5").OrderByKey()
+ *  2. Returned JSON isn't in order, as JSON interpreters don't enforce any ordering.
+ *  3. Filter functions params are in string, if you pass 5 as string, it will count
+       it as number. If you want to filter by string, pass string inside quoutes.
+       E.g EqualTo(""\Orange"\")
+ *
+ * If you want to order, you have to order itself in application.
+ * I'm planning to write a helper function to order json in future updates.
+*/
+
+//StartAt
+firebase.Child("users").StartAt("5").OrderByKey().OnSuccess(json =>
+{
+    //returns json string
+});
+
+//EndAt
+firebase.Child("users").EndAt("125").OrderByKey().OnSuccess(json =>
+{
+    //returns json string
+});
+
+//LimitToFirst
+firebase.Child("users").LimitToFirst("25").OrderByChild("id").OnSuccess(json =>
+{
+    //returns json string
+});
+
+
+//LimitToLast
+firebase.Child("users").LimitToLast("25").OrderByChild("id").OnSuccess(json =>
+{
+    //returns json string
+});
+
+//EqualTo
+firebase.Child("users").EqualTo("\"John Doe\"").OrderByChild("name").OnSuccess(json =>
+{
+    //returns json string
+});
+
+
+/* -- Generate Push ID Locally -- */
+
+string pushId = firebase.GeneratePushID();
+
+```
 
 ### Authentication
 
 - Email-Password Authentication
+  - Login and Registration
+  - Forget Password Email
+  - Email Verification Email
+  - Change Email/Password
 - Anonymous Authentication
-- Email-Password Account Actions (Forget, Change Email/Password)
 - OAuth Login
+  - Login with oauth token from any provider
 - Google OAuth Desktop Flow (Loopback)
-- Auth Profile Actions (Display Name, Photo URL)
+- User Profile Actions (Display Name, Photo URL)
+  - Change/Add Display Name
+  - Change/Add Photo URL
+  - Get full profile
 
 ### Firebase Storage
 
@@ -62,21 +270,17 @@ OnSuccess(res =>
     //res = UploadResponse
     Debug.Log(res.downloadUrl);
 });
+
+//Progress are between 0~1
+
+//Progress action can be passed as null argument, or simply without passing any.
+
+firebaseStorage.Upload(filePath, "File_From_File_Path_Array", null);
+firebaseStorage.Upload(filePath, "File_From_File_Path_Array");
+
 ```
 
 More Features are being added on regular basis.
-
-# Installation
-
-Open Package Manager in Unity and Click on Plus Icon -> Add package from git URL, paste following link `https://github.com/SrejonKhan/FirebaseRestClient.git` and click Add.
-
-Other methods (Asset Store, UPM, Release Page) will be added later after a stable release.
-
-After importing to your project, \*\*Open Settings from (Edit -> Project Settings -> Firebase Rest Client) and set all required credentials.
-
-<p align="center">
-  <img width="80%" src="Documentation/configuration.png">
-</p>
 
 # Documentation
 
