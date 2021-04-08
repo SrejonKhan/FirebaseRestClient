@@ -12,8 +12,10 @@ namespace FirebaseRestClient
         //Authentication
         internal static string api = "";
 
+        //Storage
         internal static string storageEndpoint = "";
 
+        //Google OAuth
         internal static string googleClientId = "";
         internal static string googleClientSecret = "";
 

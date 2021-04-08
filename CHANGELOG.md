@@ -1,3 +1,11 @@
+## [0.6.4] - 08-04-2021
+
+Optimized HasChild function, LoadSettings enhanced. 
+
+### Changed
+- HasChild function optimized. (RealtimeDatabase.cs)
+- LoadSettings() funciton enhanced. (FirebaseSettings.cs)
+
 ## [0.6.3] - 08-04-2021
 
 Core classes name changed to more meaningfull name. 

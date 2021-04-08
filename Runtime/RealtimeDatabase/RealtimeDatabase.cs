@@ -51,7 +51,7 @@ namespace FirebaseRestClient
 
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.endpoint + "/" + path + ".json",
+                Uri = FirebaseConfig.endpoint + path + ".json",
                 Body = body
             };
 
@@ -75,7 +75,7 @@ namespace FirebaseRestClient
 
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.endpoint + "/" + path + ".json",
+                Uri = FirebaseConfig.endpoint + path + ".json",
                 BodyString = json
             };
 
@@ -101,7 +101,7 @@ namespace FirebaseRestClient
 
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.endpoint + "/" + path + ".json",
+                Uri = FirebaseConfig.endpoint + path + ".json",
                 BodyString = json
             };
 
@@ -127,7 +127,7 @@ namespace FirebaseRestClient
 
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.endpoint + "/" + path + ".json",
+                Uri = FirebaseConfig.endpoint + path + ".json",
                 BodyString = json
             };
 
@@ -161,7 +161,7 @@ namespace FirebaseRestClient
 
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.endpoint + "/" + path + "/" + uid + ".json",
+                Uri = FirebaseConfig.endpoint + path + "/" + uid + ".json",
                 BodyString = json
             };
 
@@ -185,7 +185,7 @@ namespace FirebaseRestClient
 
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.endpoint + "/" + path + "/" + uid + ".json",
+                Uri = FirebaseConfig.endpoint + path + "/" + uid + ".json",
                 Body = body
             };
 
@@ -205,7 +205,7 @@ namespace FirebaseRestClient
         {
             GeneralCallback callbackHandler = new GeneralCallback();
 
-            string route = FirebaseConfig.endpoint + "/" + path + ".json";
+            string route = FirebaseConfig.endpoint + path + ".json";
 
             RESTHelper.Delete(route, res =>
             {
@@ -224,7 +224,7 @@ namespace FirebaseRestClient
         {
             DictionaryCallback<string, string> callbackHandler = new DictionaryCallback<string, string>();
 
-            string route = FirebaseConfig.endpoint + "/" + path + ".json";
+            string route = FirebaseConfig.endpoint + path + ".json";
 
             RESTHelper.Get(route, res =>
             {
@@ -251,7 +251,7 @@ namespace FirebaseRestClient
         {
             DictionaryCallback<string, T> callbackHandler = new DictionaryCallback<string, T>();
 
-            string route = FirebaseConfig.endpoint + "/" + path + ".json";
+            string route = FirebaseConfig.endpoint + path + ".json";
 
             RESTHelper.Get(route, res =>
             {
@@ -278,7 +278,7 @@ namespace FirebaseRestClient
         {
             StringCallback callbackHandler = new StringCallback();
 
-            string route = FirebaseConfig.endpoint + "/" + path + ".json";
+            string route = FirebaseConfig.endpoint + path + ".json";
 
             RESTHelper.Get(route, res =>
             {
@@ -296,34 +296,19 @@ namespace FirebaseRestClient
         {
             BooleanCallback callbackHandler = new BooleanCallback();
 
-            string route = FirebaseConfig.endpoint + "/" + path + ".json";
+            string route = FirebaseConfig.endpoint + path + "/" + child + ".json";
 
             RESTHelper.Get(route, res =>
             {
-                var resData = fsJsonParser.Parse(res.Text); //in JSON
-
-                object deserializedRes = null;
-
-                fsSerializer serializer = new fsSerializer();
-
-                var deserializationResult = serializer.TryDeserialize(resData, typeof(Dictionary<string, string>), ref deserializedRes).Succeeded;
-
-                bool hasChild = false;
-
-                if (deserializationResult)
+                //If there is no child, server return "null", so we are checking if res text is greater than 4
+                if (res.Text.Length > 4)
                 {
-                    Dictionary<string, string> destructuredRes = (Dictionary<string, string>)deserializedRes;
-                    hasChild = destructuredRes.ContainsKey(child);
+                    callbackHandler.successCallback?.Invoke(true);
                 }
-                else 
+                else
                 {
-                    serializer.TryDeserialize(resData, typeof(Dictionary<string, object>), ref deserializedRes);
-
-                    Dictionary<string, object> destructuredResObj = (Dictionary<string, object>)deserializedRes;
-                    hasChild = destructuredResObj.ContainsKey(child);
+                    callbackHandler.successCallback?.Invoke(false);
                 }
-
-                callbackHandler.successCallback?.Invoke(hasChild); //UID
             },
             err =>
             {
@@ -339,7 +324,7 @@ namespace FirebaseRestClient
 
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.endpoint + "/" + path + ".json",
+                Uri = FirebaseConfig.endpoint + path + ".json",
                 Body = body
             };
             RESTHelper.Patch(req, res =>
@@ -360,7 +345,7 @@ namespace FirebaseRestClient
 
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.endpoint + "/" + path + ".json",
+                Uri = FirebaseConfig.endpoint + path + ".json",
                 BodyString = json,
             };
             RESTHelper.Patch(req, res =>
@@ -420,7 +405,7 @@ namespace FirebaseRestClient
                 {
                     { "Accept", "text/event-stream"}
                 },
-                Uri = FirebaseConfig.endpoint + "/" + path + ".json",
+                Uri = FirebaseConfig.endpoint + path + ".json",
                 DownloadHandler = eventHandler,
                 Retries = int.MaxValue,
                 RetrySecondsDelay = 1
@@ -443,7 +428,7 @@ namespace FirebaseRestClient
 
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.endpoint + "/" + path + ".json",
+                Uri = FirebaseConfig.endpoint + path + ".json",
                 Params = new Dictionary<string, string>
                         {
                             {"orderBy", "\"" + key + "\""}
@@ -474,7 +459,7 @@ namespace FirebaseRestClient
 
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.endpoint + "/" + path + ".json",
+                Uri = FirebaseConfig.endpoint + path + ".json",
                 Params = new Dictionary<string, string>
                     {
                         {"orderBy", "\"$key\""}
@@ -502,7 +487,7 @@ namespace FirebaseRestClient
 
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.endpoint + "/" + path + ".json",
+                Uri = FirebaseConfig.endpoint + path + ".json",
                 Params = new Dictionary<string, string>
                     {
                         {"orderBy", "\"$value\""}

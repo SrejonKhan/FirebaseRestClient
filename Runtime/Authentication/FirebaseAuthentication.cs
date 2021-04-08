@@ -64,8 +64,6 @@ namespace FirebaseRestClient
 
                 onStateChanged?.Invoke(this, null); //Invoke On State Change Event
 
-                Debug.Log(user.accessToken);
-
                 callbackHandler.successCallback?.Invoke(user);
 
             },

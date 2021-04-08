@@ -49,7 +49,7 @@ namespace FirebaseRestClient
             if (instance) return;
 
             instance = FindOrCreateInstance();
-            FirebaseConfig.endpoint = instance.endpoint;
+            FirebaseConfig.endpoint = instance.endpoint.EndsWith("/") ? instance.endpoint : instance.endpoint + "/" ;
 
             FirebaseConfig.api = instance.webApi;
 
@@ -59,8 +59,7 @@ namespace FirebaseRestClient
             FirebaseConfig.facebookClientId = instance.facebookClientId;
             FirebaseConfig.facebookClientSecret = instance.facebookClientSecret;
 
-
-            FirebaseConfig.storageEndpoint = instance.storageEndpoint;
+            FirebaseConfig.storageEndpoint = string.Format("https://firebasestorage.googleapis.com/v0/b/{0}/o", instance.storageEndpoint);
         }
 
         static FirebaseSettings FindOrCreateInstance()
