@@ -1,3 +1,14 @@
+## [0.6.5] - 10-04-2021
+
+Added authenticated request for both Firebase Realtime Database and Storage.
+
+### Added 
+- Authenticated Request support for Realtime Database and Storage
+
+### Fixed
+- UWP UploadHandler null ref issue fixed
+
+
 ## [0.6.4] - 08-04-2021
 
 Optimized HasChild function, LoadSettings enhanced. 

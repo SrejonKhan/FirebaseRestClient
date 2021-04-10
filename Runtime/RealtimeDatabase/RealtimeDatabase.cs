@@ -51,7 +51,7 @@ namespace FirebaseRestClient
 
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.endpoint + path + ".json",
+                Uri = FirebaseConfig.endpoint + path + ".json" + GetAuthParam(),
                 Body = body
             };
 
@@ -75,7 +75,7 @@ namespace FirebaseRestClient
 
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.endpoint + path + ".json",
+                Uri = FirebaseConfig.endpoint + path + ".json" + GetAuthParam(),
                 BodyString = json
             };
 
@@ -101,7 +101,7 @@ namespace FirebaseRestClient
 
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.endpoint + path + ".json",
+                Uri = FirebaseConfig.endpoint + path + ".json" + GetAuthParam(),
                 BodyString = json
             };
 
@@ -127,7 +127,7 @@ namespace FirebaseRestClient
 
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.endpoint + path + ".json",
+                Uri = FirebaseConfig.endpoint + path + ".json" + GetAuthParam(),
                 BodyString = json
             };
 
@@ -161,7 +161,7 @@ namespace FirebaseRestClient
 
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.endpoint + path + "/" + uid + ".json",
+                Uri = FirebaseConfig.endpoint + path + "/" + uid + ".json" + GetAuthParam(),
                 BodyString = json
             };
 
@@ -185,7 +185,7 @@ namespace FirebaseRestClient
 
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.endpoint + path + "/" + uid + ".json",
+                Uri = FirebaseConfig.endpoint + path + "/" + uid + ".json" + GetAuthParam(),
                 Body = body
             };
 
@@ -205,7 +205,7 @@ namespace FirebaseRestClient
         {
             GeneralCallback callbackHandler = new GeneralCallback();
 
-            string route = FirebaseConfig.endpoint + path + ".json";
+            string route = FirebaseConfig.endpoint + path + ".json" + GetAuthParam();
 
             RESTHelper.Delete(route, res =>
             {
@@ -224,7 +224,7 @@ namespace FirebaseRestClient
         {
             DictionaryCallback<string, string> callbackHandler = new DictionaryCallback<string, string>();
 
-            string route = FirebaseConfig.endpoint + path + ".json";
+            string route = FirebaseConfig.endpoint + path + ".json" + GetAuthParam();
 
             RESTHelper.Get(route, res =>
             {
@@ -251,7 +251,7 @@ namespace FirebaseRestClient
         {
             DictionaryCallback<string, T> callbackHandler = new DictionaryCallback<string, T>();
 
-            string route = FirebaseConfig.endpoint + path + ".json";
+            string route = FirebaseConfig.endpoint + path + ".json" + GetAuthParam();
 
             RESTHelper.Get(route, res =>
             {
@@ -278,7 +278,7 @@ namespace FirebaseRestClient
         {
             StringCallback callbackHandler = new StringCallback();
 
-            string route = FirebaseConfig.endpoint + path + ".json";
+            string route = FirebaseConfig.endpoint + path + ".json" + GetAuthParam();
 
             RESTHelper.Get(route, res =>
             {
@@ -296,7 +296,7 @@ namespace FirebaseRestClient
         {
             BooleanCallback callbackHandler = new BooleanCallback();
 
-            string route = FirebaseConfig.endpoint + path + "/" + child + ".json";
+            string route = FirebaseConfig.endpoint + path + "/" + child + ".json" + GetAuthParam();
 
             RESTHelper.Get(route, res =>
             {
@@ -324,7 +324,7 @@ namespace FirebaseRestClient
 
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.endpoint + path + ".json",
+                Uri = FirebaseConfig.endpoint + path + ".json" + GetAuthParam(),
                 Body = body
             };
             RESTHelper.Patch(req, res =>
@@ -345,7 +345,7 @@ namespace FirebaseRestClient
 
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.endpoint + path + ".json",
+                Uri = FirebaseConfig.endpoint + path + ".json" + GetAuthParam(),
                 BodyString = json,
             };
             RESTHelper.Patch(req, res =>
@@ -405,7 +405,7 @@ namespace FirebaseRestClient
                 {
                     { "Accept", "text/event-stream"}
                 },
-                Uri = FirebaseConfig.endpoint + path + ".json",
+                Uri = FirebaseConfig.endpoint + path + ".json" + GetAuthParam(),
                 DownloadHandler = eventHandler,
                 Retries = int.MaxValue,
                 RetrySecondsDelay = 1
@@ -428,7 +428,7 @@ namespace FirebaseRestClient
 
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.endpoint + path + ".json",
+                Uri = FirebaseConfig.endpoint + path + ".json" + GetAuthParam(),
                 Params = new Dictionary<string, string>
                         {
                             {"orderBy", "\"" + key + "\""}
@@ -459,7 +459,7 @@ namespace FirebaseRestClient
 
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.endpoint + path + ".json",
+                Uri = FirebaseConfig.endpoint + path + ".json" + GetAuthParam(),
                 Params = new Dictionary<string, string>
                     {
                         {"orderBy", "\"$key\""}
@@ -487,7 +487,7 @@ namespace FirebaseRestClient
 
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.endpoint + path + ".json",
+                Uri = FirebaseConfig.endpoint + path + ".json" + GetAuthParam(),
                 Params = new Dictionary<string, string>
                     {
                         {"orderBy", "\"$value\""}
@@ -581,6 +581,15 @@ namespace FirebaseRestClient
             startAtValue = filters.startAtValue;
             endAtValue = filters.endAtValue;
             equalToValue = filters.equalToValue;
+        }
+
+        /// <summary>
+        /// Get Auth Param if any user is authenticated 
+        /// </summary>
+        /// <returns>returns auth param, can be null if there's no user authenticated</returns>
+        string GetAuthParam()
+        {
+            return FirebaseAuthentication.currentUser != null ? $"?auth={FirebaseAuthentication.currentUser.accessToken}" : "";
         }
     }
 

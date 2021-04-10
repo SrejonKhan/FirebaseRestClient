@@ -78,6 +78,7 @@ namespace FirebaseRestClient
         IEnumerator UploadFile(string filePath, string name)
         {
             UploadHandler uploadHandler = new UploadHandlerFile(filePath);
+            //Debug.Log(FirebaseConfig.storageEndpoint + GetAuthParam());
             RequestHelper req = new RequestHelper
             {
                 Uri = FirebaseConfig.storageEndpoint,
@@ -89,6 +90,13 @@ namespace FirebaseRestClient
                 ContentType = "application/octet-stream",
                 UploadHandler = uploadHandler
             };
+
+            // Authenticate request if any user signed in
+            if (FirebaseAuthentication.currentUser != null)
+            {
+                req.Headers.Add("Authorization", "Bearer " + FirebaseAuthentication.currentUser.accessToken);
+            }
+
 
             RESTHelper.Post(req, res =>
             {
@@ -103,15 +111,20 @@ namespace FirebaseRestClient
                 callbackHandler.exceptionCallback?.Invoke(err);
             });
 
+            float lastProgress = 0f;            
             //Progress Callback
             if (uploadProgressCallback != null)
             {
                 while (uploadHandler.progress != 1)
                 {
                     uploadProgressCallback.Invoke(uploadHandler.progress);
-                    yield return new WaitForSecondsRealtime(0.25f);
-                }
-                uploadProgressCallback?.Invoke(1f);
+                    yield return new WaitUntil(() => 
+                    uploadHandler.progress >= 0.95f? uploadHandler.progress == 1f : //If reached 95% or avobe, we will wait for 100% 
+                    uploadHandler.progress >= lastProgress + 0.05f); //Else, we will wait for reaching next 5%
+
+                }                
+                uploadProgressCallback.Invoke(1f);
+                uploadHandler.Dispose();
             }
         }
 
@@ -130,6 +143,12 @@ namespace FirebaseRestClient
                 UploadHandler = uploadHandler
             };
 
+            // Authenticate request if any user signed in
+            if (FirebaseAuthentication.currentUser != null)
+            {
+                req.Headers.Add("Authorization", "Bearer " + FirebaseAuthentication.currentUser.accessToken);
+            }
+
             RESTHelper.Post(req, res =>
             {
                 UploadResponse uploadResponse = JsonUtility.FromJson<UploadResponse>(res);
@@ -143,17 +162,20 @@ namespace FirebaseRestClient
                 callbackHandler.exceptionCallback?.Invoke(err);
             });
 
+            float lastProgress = 0f;
             //Progress Callback
             if (uploadProgressCallback != null)
             {
                 while (uploadHandler.progress != 1)
                 {
                     uploadProgressCallback.Invoke(uploadHandler.progress);
-                    yield return new WaitForSecondsRealtime(0.25f);
+                    yield return new WaitUntil(() =>
+                    uploadHandler.progress >= 0.95f ? uploadHandler.progress == 1f : //If reached 95% or avobe, we will wait for 100% 
+                    uploadHandler.progress >= lastProgress + 0.05f); //Else, we will wait for reaching next 5%
                 }
-                uploadProgressCallback?.Invoke(1f);
+                uploadProgressCallback.Invoke(1f);
+                uploadHandler.Dispose();
             }
         }
-
     }
 }

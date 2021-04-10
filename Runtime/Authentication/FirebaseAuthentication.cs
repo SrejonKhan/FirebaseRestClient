@@ -21,7 +21,7 @@ namespace FirebaseRestClient
             remove { onStateChanged -= value; }
         }
 
-        private static FirebaseUser currentUser;
+        internal static FirebaseUser currentUser;
 
         public FirebaseUser CurrentUser { get => currentUser; }
 

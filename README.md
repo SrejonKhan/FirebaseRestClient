@@ -18,7 +18,7 @@ After importing to your project, **Open Settings from (Edit -> Project Settings 
 
 # Features
 
-This library is so far supporting Realtime Database, Authentication from Firebase. Planning to add more support in future.
+This library is so far supporting Realtime Database, Authentication and Storage from Firebase. Planning to add more support in future.
 
 ### Realtime Database
 
@@ -45,8 +45,11 @@ This library is so far supporting Realtime Database, Authentication from Firebas
 - Locally generate Push ID
 
 ```csharp
+//Initialize
 var firebase = new RealtimeDatabase();
+```
 
+```csharp
 /* -- Read -- */
 
 firebase.Child("users").Read<User>().OnSuccess(result =>
@@ -73,10 +76,9 @@ firebase.Child("product").Child("orange").RawRead().OnSuccess(result =>
     //Returns result in Json string
     Debug.Log(result);
 });
+```
 
-
-
-
+```csharp
 /* -- Push -- */
 /*
  * Push functionality in this library is a bit different from actual Firebase SDK
@@ -101,10 +103,9 @@ firebase.Child("users").Push(jsonString).OnSuccess(uid =>
     //Returns Push ID in string
     Debug.Log(uid);
 });
+```
 
-
-
-
+```csharp
 /* -- Write -- */
 
 // Object as payload
@@ -118,10 +119,9 @@ firebase.Child("leaderboard").Write("player123", "123");
 
 // Json string as Payload
 firebase.Child("product").Child("orange").Write(jsonString);
+```
 
-
-
-
+```csharp
 /* -- Update -- */
 
 // Object as payload
@@ -129,17 +129,17 @@ firebase.Child("users").Child("123").Update(user).OnSuccess( () => { /*...Codes.
 
 // Json string as payload
 firebase.Child("users").Child("123").Update(jsonString);
+```
 
-
-
+```csharp
 /* -- Remove -- */
 
 firebase.Child("product").Child("orange").Remove().OnSuccess( () => { /*...Codes...*/ });
 
 firebase.Child("product").Child("orange").Remove();
+```
 
-
-
+```csharp
 /* -- Order -- */
 /*
  * Order functions return a Json String.
@@ -167,8 +167,9 @@ firebase.Child("users").OrderByChild("id").OnSuccess(json =>
 {
     //returns json string
 });
+```
 
-
+```csharp
 /* -- Order with Filters -- */
 /*
  * Things to remember while filtering -
@@ -212,12 +213,12 @@ firebase.Child("users").EqualTo("\"John Doe\"").OrderByChild("name").OnSuccess(j
 {
     //returns json string
 });
+```
 
-
+```csharp
 /* -- Generate Push ID Locally -- */
 
 string pushId = firebase.GeneratePushID();
-
 ```
 
 ### Authentication
@@ -236,12 +237,83 @@ string pushId = firebase.GeneratePushID();
   - Change/Add Photo URL
   - Get full profile
 
+```csharp
+//initialize
+FirebaseAuthentication firebaseAuth = new FirebaseAuthentication();
+
+firebaseAuth.CreateUserWithEmailAndPassword(email, password); //Password Signup
+
+firebaseAuth.SignInWithEmailAndPassword(email, password); //Password Signin
+
+firebaseAuth.SignInAnonymously(); //Anonymous SignIn
+
+firebaseAuth.SignInWithOAuth("ACCESS_TOKEN_FROM_PROVIDER", "YOUR_PROVIDER_ID"); //OAuth SignIn
+
+firebaseAuth.GoogleSignIn("AUTH_CODE_FROM_GOOGLE_TO_EXCHANGE_ACCESS_TOKEN"); //Google SignIn
+firebaseAuth.FacebookSignIn("AUTH_CODE_FROM_FACEBOOK_TO_EXCHANGE_ACCESS_TOKEN"); //Facebook SignIn
+
+firebaseAuth.SendPasswordResetEmail(email); //Password Reset Mail
+firebaseAuth.SendEmailVerification(); //Email Verification (user must be signed in)
+```
+
+```csharp
+/*
+* Firebase User Actions
+*/
+
+FirebaseUser user = firebaseAuth.CurrentUser; //Current User automatically updates after any sign-in
+
+user.ChangeEmail(newEmail); //Change Email
+user.ChangePassword(newPassword); //Change Password
+
+user.UpdateProfile("NEW_DISPLAY_NAME", "PHOTO_URL"); //Update Profile
+
+user.Reload(); //Refresh User
+user.RefreshAccessToken(); //Force to refresh token
+user.Delete(); //Delete user
+
+//User props
+string displayName = user.DisplayName;
+string userEmail = user.Email;
+bool isEmailVerified = user.IsEmailVerified;
+bool isAnonymous = user.IsAnonymous;
+string photoUrl = user.PhotoUrl;
+string provider = user.Provider;
+
+firebaseAuth.SignOut(); //Sign out any signed-in user
+
+
+/*
+* Auth State Change Listening
+*/
+
+firebaseAuth.StateChanged += AuthStateChanged;
+
+// Track state changes of the auth object.
+void AuthStateChanged(object sender, System.EventArgs eventArgs)
+{
+    if (firebaseAuth.CurrentUser != user)
+    {
+        bool signedIn = user != firebaseAuth.CurrentUser && firebaseAuth.CurrentUser != null;
+        if (!signedIn && user != null)
+        {
+            Debug.Log("Signed out " + user.LocalId);
+        }
+        user = firebaseAuth.CurrentUser;
+        if (signedIn)
+        {
+            Debug.Log("Signed in " + user.LocalId);
+        }
+    }
+}
+```
+
 ### Firebase Storage
 
 - Upload File
 
 ```csharp
-//reference
+//initialize
 var firebaseStorage = new FirebaseStorage();
 
 //Upload from direct filepath
