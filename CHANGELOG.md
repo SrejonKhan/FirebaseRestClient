@@ -1,5 +1,12 @@
 ## [0.6.5] - 10-04-2021
 
+Small fixes. 
+
+### Fixed
+- User UpdateProfile() function fixed
+
+## [0.6.5] - 10-04-2021
+
 Added authenticated request for both Firebase Realtime Database and Storage.
 
 ### Added 

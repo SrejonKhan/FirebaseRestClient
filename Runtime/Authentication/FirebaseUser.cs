@@ -192,6 +192,8 @@ namespace FirebaseRestClient
             {
                 var user = result.ToUser(this);
 
+                FirebaseAuthentication.currentUser = user;
+
                 callbackHandler.successCallback?.Invoke(user);
             },
             err =>
