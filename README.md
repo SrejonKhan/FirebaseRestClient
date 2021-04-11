@@ -2,7 +2,7 @@
 
 Lightweight Firebase Library, made on top of REST API.
 
-Implement Firebase to any Project without importing any Firebase SDK. This Library comes with all major features of Firebase SDK, including Realtime Database, Authentication and others are coming soon.
+Implement Firebase to any Project without importing any Firebase SDK. This Library comes with all major features of Firebase SDK, including Realtime Database, Authentication, Storage and others are coming soon.
 
 # Installation
 
@@ -43,6 +43,8 @@ This library is so far supporting Realtime Database, Authentication and Storage 
   - EqualTo
   - LimitTo
 - Locally generate Push ID
+
+#### Example
 
 ```csharp
 //Initialize
@@ -221,7 +223,7 @@ firebase.Child("users").EqualTo("\"John Doe\"").OrderByChild("name").OnSuccess(j
 string pushId = firebase.GeneratePushID();
 ```
 
-### Authentication
+### Authentication (Experimental)
 
 - Email-Password Authentication
   - Login and Registration
@@ -236,6 +238,8 @@ string pushId = firebase.GeneratePushID();
   - Change/Add Display Name
   - Change/Add Photo URL
   - Get full profile
+
+#### Example
 
 ```csharp
 //initialize
@@ -311,6 +315,8 @@ void AuthStateChanged(object sender, System.EventArgs eventArgs)
 ### Firebase Storage
 
 - Upload File
+
+#### Example
 
 ```csharp
 //initialize

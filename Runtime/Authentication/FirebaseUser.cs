@@ -104,9 +104,9 @@ namespace FirebaseRestClient
             return callbackHandler;
         }
 
-        public ChangeEmailCallback ChangeEmail(string newEmail)
+        public GeneralCallback ChangeEmail(string newEmail)
         {
-            ChangeEmailCallback callbackHandler = new ChangeEmailCallback();
+            GeneralCallback callbackHandler = new GeneralCallback();
 
             string rawBody = "{" +
             $"\"idToken\":\"{accessToken}\"," +
@@ -126,7 +126,12 @@ namespace FirebaseRestClient
 
             RESTHelper.Post<ChangeEmailResponse>(req, result =>
             {
-                callbackHandler.successCallback?.Invoke(result);
+                accessToken = string.IsNullOrEmpty(result.idToken)? accessToken : result.idToken;
+                refreshToken = string.IsNullOrEmpty(result.refreshToken) ? refreshToken : result.refreshToken;
+
+                FirebaseAuthentication.currentUser = this;
+
+                callbackHandler.successCallback?.Invoke();
             },
             err =>
             {
@@ -135,9 +140,9 @@ namespace FirebaseRestClient
             return callbackHandler;
         }
 
-        public ChangePasswordCallback ChangePassword(string newPassword)
+        public GeneralCallback ChangePassword(string newPassword)
         {
-            ChangePasswordCallback callbackHandler = new ChangePasswordCallback();
+            GeneralCallback callbackHandler = new GeneralCallback();
 
             string rawBody = "{" +
             $"\"idToken\":\"{accessToken}\"," +
@@ -157,7 +162,12 @@ namespace FirebaseRestClient
 
             RESTHelper.Post<ChangePasswordResponse>(req, result =>
             {
-                callbackHandler.successCallback?.Invoke(result);
+                accessToken = string.IsNullOrEmpty(result.idToken) ? accessToken : result.idToken;
+                refreshToken = string.IsNullOrEmpty(result.refreshToken) ? refreshToken : result.refreshToken;
+
+                FirebaseAuthentication.currentUser = this;
+
+                callbackHandler.successCallback?.Invoke();
             },
             err =>
             {
@@ -188,13 +198,15 @@ namespace FirebaseRestClient
                 BodyString = rawBody
             };
 
+
             RESTHelper.Post<UpdateProfileResponse>(req, result =>
             {
-                var user = result.ToUser(this);
+                displayName = string.IsNullOrEmpty(result.displayName) ? displayName : result.displayName;
+                photoUrl = string.IsNullOrEmpty(result.photoUrl) ? photoUrl : result.photoUrl;
 
-                FirebaseAuthentication.currentUser = user;
+                FirebaseAuthentication.currentUser = this;
 
-                callbackHandler.successCallback?.Invoke(user);
+                callbackHandler.successCallback?.Invoke(this);
             },
             err =>
             {

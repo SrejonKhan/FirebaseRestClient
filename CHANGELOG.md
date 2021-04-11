@@ -1,4 +1,14 @@
-## [0.6.5] - 10-04-2021
+## [0.6.7] - 12-04-2021
+
+Update profile issue fixed. 
+
+### Fixed
+- Update Profile refresh token and id token reassign issue fixed
+
+### Changed
+- ChangePassword() and ChangeEmail() function's callback changed to GeneralCallback.
+
+## [0.6.6] - 11-04-2021
 
 Small fixes. 
 
