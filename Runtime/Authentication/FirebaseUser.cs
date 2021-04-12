@@ -81,6 +81,7 @@ namespace FirebaseRestClient
 
             RESTHelper.Post(req, result =>
             {
+                Debug.Log(result);
                 var resData = fsJsonParser.Parse(result); //in JSON
                 object deserializedRes = null;
                 //callbackHandler.successCallback?.Invoke();
@@ -201,8 +202,8 @@ namespace FirebaseRestClient
 
             RESTHelper.Post<UpdateProfileResponse>(req, result =>
             {
-                displayName = string.IsNullOrEmpty(result.displayName) ? displayName : result.displayName;
-                photoUrl = string.IsNullOrEmpty(result.photoUrl) ? photoUrl : result.photoUrl;
+                this.displayName = string.IsNullOrEmpty(result.displayName) ? this.displayName : result.displayName;
+                this.photoUrl = string.IsNullOrEmpty(result.photoUrl) ? this.photoUrl : result.photoUrl;
 
                 FirebaseAuthentication.currentUser = this;
 

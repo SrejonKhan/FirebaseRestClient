@@ -1,3 +1,10 @@
+## [0.6.8] - 12-04-2021
+
+Fixed DisplayName and PhotoURL issue.
+
+### Fixed
+- Fixed DisplayName and PhotoURL not updating issue fixed. 
+
 ## [0.6.7] - 12-04-2021
 
 Update profile issue fixed. 
