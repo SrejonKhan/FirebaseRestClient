@@ -59,23 +59,9 @@ namespace FirebaseRestClient
             }
             listener = new HttpListener();
 
-            //X509Certificate2 cert = new X509Certificate2(Path.Combine(Application.streamingAssetsPath, "lchst.pfx"));
-            //cert.FriendlyName = "Firebase Rest Client";
-
-            //X509Store store = new X509Store(StoreName.CertificateAuthority, StoreLocation.CurrentUser);
-            //store.Open(OpenFlags.ReadWrite);
-            //if (!store.Certificates.Contains(cert))
-            //{
-            //    store.Add(cert);
-            //}
-            //store.Close();
-
-
-
             if (isStringLocalhost)
             {
                 //AddAddress($"{stringLocalhostPrefix}:{port}/");
-
                 listener.Prefixes.Add($"{stringLocalhostPrefix}:{port}/");
             }
             else

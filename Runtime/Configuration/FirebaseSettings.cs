@@ -30,9 +30,6 @@ namespace FirebaseRestClient
         public string facebookClientId = "";
         public string facebookClientSecret = "";
 
-
-
-
         private static FirebaseSettings instance;
 
         public static FirebaseSettings Instance

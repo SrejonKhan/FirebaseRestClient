@@ -1,62 +1,83 @@
+## [0.6.9] - 21-04-2021
+
+Google SignIn Standalone loopback enhanced and sdk implementation guide
+
+### Added
+
+- Google SignIn SDK implementation guide and loopback guide
+
+### Changed
+
+- Google SignIn loopback converted to a Function
+
 ## [0.6.8] - 12-04-2021
 
 Fixed DisplayName and PhotoURL issue.
 
 ### Fixed
-- Fixed DisplayName and PhotoURL not updating issue fixed. 
+
+- Fixed DisplayName and PhotoURL not updating issue fixed.
 
 ## [0.6.7] - 12-04-2021
 
-Update profile issue fixed. 
+Update profile issue fixed.
 
 ### Fixed
+
 - Update Profile refresh token and id token reassign issue fixed
 
 ### Changed
+
 - ChangePassword() and ChangeEmail() function's callback changed to GeneralCallback.
 
 ## [0.6.6] - 11-04-2021
 
-Small fixes. 
+Small fixes.
 
 ### Fixed
+
 - User UpdateProfile() function fixed
 
 ## [0.6.5] - 10-04-2021
 
 Added authenticated request for both Firebase Realtime Database and Storage.
 
-### Added 
+### Added
+
 - Authenticated Request support for Realtime Database and Storage
 
 ### Fixed
-- UWP UploadHandler null ref issue fixed
 
+- UWP UploadHandler null ref issue fixed
 
 ## [0.6.4] - 08-04-2021
 
-Optimized HasChild function, LoadSettings enhanced. 
+Optimized HasChild function, LoadSettings enhanced.
 
 ### Changed
+
 - HasChild function optimized. (RealtimeDatabase.cs)
 - LoadSettings() funciton enhanced. (FirebaseSettings.cs)
 
 ## [0.6.3] - 08-04-2021
 
-Core classes name changed to more meaningfull name. 
+Core classes name changed to more meaningfull name.
 
 ### Changed
+
 - Core class name changed
 - Readme updated
 
 ### Added
+
 - Upload Function overloaded with no progress params (Storage)
 
 ## [0.6.2] - 08-04-2021
 
-All configuration is now directly editable from Project Settings and save all settings inside resource to load in runtime. 
+All configuration is now directly editable from Project Settings and save all settings inside resource to load in runtime.
 
 ### Added
+
 - Configuration migrated to ScriptableObject
 - Configuration edit from Project Settings
 

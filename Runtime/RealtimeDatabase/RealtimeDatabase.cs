@@ -411,10 +411,13 @@ namespace FirebaseRestClient
                 RetrySecondsDelay = 1
             };
 
-            GameObject go = new GameObject("FirebaseRestUnsubscriber");
-            go.AddComponent<EventUnsubscriber>().requestHelper = req;
-            MonoBehaviour.DontDestroyOnLoad(go);
-
+            var unsubscriberGO = GameObject.Find("FirebaseRestUnsubscriber");
+            if (unsubscriberGO == null)
+            {
+                unsubscriberGO = new GameObject("FirebaseRestUnsubscriber");
+                unsubscriberGO.AddComponent<EventUnsubscriber>().requestHelper = req;
+                MonoBehaviour.DontDestroyOnLoad(unsubscriberGO);
+            }
             //Error handling are being handled internally
             RESTHelper.Get(req, err => RequestErrorHelper.ToDictionary(err).ToList().ForEach(x => Debug.Log(x.Key + " - " + x.Value)));
         }

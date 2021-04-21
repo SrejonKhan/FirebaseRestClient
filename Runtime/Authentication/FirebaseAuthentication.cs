@@ -235,7 +235,10 @@ namespace FirebaseRestClient
 
         public OAuthSignInCallback GoogleSignIn(string authCode)
         {
-            OAuthSignInCallback callbackHandler = new OAuthSignInCallback();
+            OAuthSignInCallback callbackHandler =  new OAuthSignInCallback();
+
+            if (loopbackCb != null) callbackHandler = loopbackCb; //If we have any cached handler
+            loopbackCb = null;
 
             string url = $"https://oauth2.googleapis.com/token?" +
                 $"code={authCode}&" +
@@ -262,10 +265,56 @@ namespace FirebaseRestClient
             return callbackHandler;
         }
 
-        public OAuthSignInCallback FacebookSignIn(string authCode)
+        private OAuthSignInCallback loopbackCb;
+
+        public OAuthSignInCallback GoogleSignInLoopback(string scopes= "email profile")
         {
             OAuthSignInCallback callbackHandler = new OAuthSignInCallback();
 
+            string googleOAuthURL = $"https://accounts.google.com/o/oauth2/v2/auth?" +
+            $"client_id={FirebaseConfig.googleClientId}&" +
+            $"redirect_uri=http://127.0.0.1:5050&" +
+            $"response_type=code&" +
+            $"scope={scopes}";
+
+            RedirectionListener redirectionListener;
+                
+            redirectionListener = new RedirectionListener();
+            redirectionListener.Init(5050, ProcessRedirectionCallback);
+
+            //Add to Unsubscriber to stop listener
+            var unsubscriberGO = GameObject.Find("FirebaseRestUnsubscriber");
+            if (unsubscriberGO == null)
+            {
+                unsubscriberGO = new GameObject("FirebaseRestUnsubscriber");
+                unsubscriberGO.AddComponent<EventUnsubscriber>().redirectionListener = redirectionListener;
+                MonoBehaviour.DontDestroyOnLoad(unsubscriberGO);
+            }
+
+            Application.OpenURL(googleOAuthURL); //Open URL in Browser
+
+            loopbackCb = callbackHandler; //Caching for future usage in different method
+            return callbackHandler;
+        }
+
+        void ProcessRedirectionCallback(string response)
+        {
+            //Different provider may have different response, it's better to study on response 
+            //This following function works perfectly for Google and FB, haven't tried others.
+
+            if (response.Contains("favicon")) return;
+
+            string[] splittedParts = response.Remove(0, 2).Split('&');
+
+            string authCode = splittedParts[0].Split('=')[1];
+
+            UnityMainThread.Init();
+            UnityMainThread.Execute(() => GoogleSignIn(authCode));
+        }
+
+        public OAuthSignInCallback FacebookSignIn(string authCode)
+        {
+            OAuthSignInCallback callbackHandler = new OAuthSignInCallback();
 
             string url = $"https://graph.facebook.com/v10.0/oauth/access_token?" +
                 $"client_id={FirebaseConfig.facebookClientId}&" +
