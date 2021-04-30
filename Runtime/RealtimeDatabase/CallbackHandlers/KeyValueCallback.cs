@@ -5,19 +5,19 @@ using UnityEngine;
 
 namespace FirebaseRestClient
 {
-    public class DictionaryCallback<T1, T2>
+    public class KeyValueCallback<T1,T2>
     {
-        internal Action<Dictionary<T1, T2>> successCallback;
+        internal Action<KeyValuePair<T1, T2>> successCallback;
         internal Action<Exception> exceptionCallback;
 
 
-        public DictionaryCallback<T1, T2> OnSuccess(Action<Dictionary<T1, T2>> callback)
+        public KeyValueCallback<T1, T2> OnSuccess(Action<KeyValuePair<T1, T2>> callback)
         {
             successCallback += callback;
             return this;
         }
 
-        public DictionaryCallback<T1, T2> OnError(Action<Exception> callback)
+        public KeyValueCallback<T1, T2> OnError(Action<Exception> callback)
         {
             exceptionCallback += callback;
             return this;

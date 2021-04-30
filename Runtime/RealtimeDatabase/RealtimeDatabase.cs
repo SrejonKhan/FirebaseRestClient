@@ -30,20 +30,17 @@ namespace FirebaseRestClient
             this.path = path;
         }
 
-
         internal RealtimeDatabase(string path, FirebaseFilters filters)
         {
             this.path = path;
             FromFirebaseFilters(filters);
         }
 
-
         public RealtimeDatabase Child(string value)
         {
             string newPath = String.IsNullOrEmpty(path) ? value : $"{path}/{value}";
             return new RealtimeDatabase(newPath, ToFirebaseFilters());
         }
-
 
         public GeneralCallback Write<T>(T body)
         {
@@ -54,8 +51,6 @@ namespace FirebaseRestClient
                 Uri = FirebaseConfig.endpoint + path + ".json" + GetAuthParam(),
                 Body = body
             };
-
-
 
             RESTHelper.Put<T>(req, res =>
             {
@@ -228,16 +223,22 @@ namespace FirebaseRestClient
 
             RESTHelper.Get(route, res =>
             {
-                var resData = fsJsonParser.Parse(res.Text); //in JSON
+                var resData = fsJsonParser.Parse(res.Text); //in JSON 
+                Dictionary<string, string> destructuredRes = new Dictionary<string, string>();
 
-                object deserializedRes = null;
-
-                fsSerializer serializer = new fsSerializer();
-                serializer.TryDeserialize(resData, typeof(Dictionary<string, string>), ref deserializedRes);
-
-                Dictionary<string, string> destructuredRes = (Dictionary<string, string>)deserializedRes;
-
-                callbackHandler.successCallback?.Invoke(destructuredRes); //UID
+                if (resData.IsDictionary)
+                {
+                    object deserializedRes = null;
+                    fsSerializer serializer = new fsSerializer();
+                    serializer.TryDeserialize(resData, typeof(Dictionary<string, string>), ref deserializedRes);
+                    destructuredRes = (Dictionary<string, string>)deserializedRes;
+                    callbackHandler.successCallback?.Invoke(destructuredRes);
+                    return;
+                }
+                //No collection, single result (key-value pair)
+                string[] splittedPaths = path.Split('/');
+                destructuredRes.Add(splittedPaths[splittedPaths.Length - 1], resData._value.ToString()); //last path as key, resData._value as value
+                callbackHandler.successCallback?.Invoke(destructuredRes);
             },
             err =>
             {
@@ -255,7 +256,7 @@ namespace FirebaseRestClient
 
             RESTHelper.Get(route, res =>
             {
-                var resData = fsJsonParser.Parse(res.Text); //in JSON
+                var resData = fsJsonParser.Parse(res.Text); 
 
                 object deserializedRes = null;
 
@@ -264,7 +265,7 @@ namespace FirebaseRestClient
 
                 Dictionary<string, T> destructuredRes = (Dictionary<string, T>)deserializedRes;
 
-                callbackHandler.successCallback?.Invoke(destructuredRes); //UID
+                callbackHandler.successCallback?.Invoke(destructuredRes);
             },
             err =>
             {
@@ -274,7 +275,27 @@ namespace FirebaseRestClient
             return callbackHandler;
         }
 
-        public StringCallback RawRead()
+        public StringCallback RawRead(bool shallow=false)
+        {
+            StringCallback callbackHandler = new StringCallback();
+
+            string route = FirebaseConfig.endpoint + path + ".json" + GetAuthParam();
+
+            if (shallow) route += GetShallowParam(); 
+
+            RESTHelper.Get(route, res =>
+            {
+                callbackHandler.successCallback?.Invoke(res.Text); 
+            },
+            err =>
+            {
+                callbackHandler.exceptionCallback?.Invoke(err);
+            });
+
+            return callbackHandler;
+        }
+
+        public StringCallback ReadValue()
         {
             StringCallback callbackHandler = new StringCallback();
 
@@ -282,7 +303,16 @@ namespace FirebaseRestClient
 
             RESTHelper.Get(route, res =>
             {
-                callbackHandler.successCallback?.Invoke(res.Text); //in JSON
+                var resData = fsJsonParser.Parse(res.Text);
+
+                if (resData.IsDictionary)
+                {
+                    callbackHandler.successCallback?.Invoke(res.Text); //invoke with raw Json, as it's not a key-value pair
+                    return;
+                }
+                //No collection
+                string value = resData._value.ToString();
+                callbackHandler.successCallback?.Invoke(value);
             },
             err =>
             {
@@ -369,12 +399,12 @@ namespace FirebaseRestClient
             ChildEventListen(childEventHandler);
         }
 
-        public void ChildAdded(Action<ChildEventArgs> callback)
+        public void ChildAdded(Action<ChildEventArgs> callback, bool shallow=false)
         {
             ChildEventHandler childEventHandler = new ChildEventHandler();
             childEventHandler.OnChildEventReceived += callback;
             childEventHandler.childEventType = ChildEventHandler.ChildEventType.ChildAdded;
-
+            childEventHandler.shallow = shallow;
             ChildEventListen(childEventHandler);
         }
 
@@ -426,9 +456,6 @@ namespace FirebaseRestClient
         {
             StringCallback callbackHandler = new StringCallback();
 
-            //Dictionary<string, string> queryParams = GetFilterCollection(false);
-            //queryParams.Add("orderBy", "\"" + key + "\"");
-
             RequestHelper req = new RequestHelper
             {
                 Uri = FirebaseConfig.endpoint + path + ".json" + GetAuthParam(),
@@ -441,12 +468,9 @@ namespace FirebaseRestClient
             //adding filters if there is
             GetFilterCollection(false)?.ToList().ForEach(x => req.Params.Add(x.Key, x.Value));
 
-            req.Params.ToList().ForEach(x => Debug.Log(x.Key + " - " + x.Value));
-
-
             RESTHelper.Get(req, res =>
             {
-                callbackHandler.successCallback?.Invoke(res.Text); //in JSON
+                callbackHandler.successCallback?.Invoke(res.Text); 
             },
             err =>
             {
@@ -474,7 +498,7 @@ namespace FirebaseRestClient
 
             RESTHelper.Get(req, res =>
             {
-                callbackHandler.successCallback?.Invoke(res.Text); //in JSON
+                callbackHandler.successCallback?.Invoke(res.Text); 
             },
             err =>
             {
@@ -502,7 +526,7 @@ namespace FirebaseRestClient
 
             RESTHelper.Get(req, res =>
             {
-                callbackHandler.successCallback?.Invoke(res.Text); //in JSON
+                callbackHandler.successCallback?.Invoke(res.Text);
             },
             err =>
             {
@@ -593,6 +617,15 @@ namespace FirebaseRestClient
         string GetAuthParam()
         {
             return FirebaseAuthentication.currentUser != null ? $"?auth={FirebaseAuthentication.currentUser.accessToken}" : "";
+        }
+
+        /// <summary>
+        /// Get Shallow Param for optimized RawRead
+        /// </summary>
+        /// <returns>returns shallow param if there is no authenticated user, else nothing</returns>
+        string GetShallowParam()
+        {
+            return FirebaseAuthentication.currentUser != null ? "" : $"?shallow=true";
         }
     }
 

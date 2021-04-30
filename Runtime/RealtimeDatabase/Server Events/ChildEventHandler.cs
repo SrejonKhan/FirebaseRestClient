@@ -7,6 +7,8 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 using System.Linq;
+using FullSerializer;
+
 
 namespace FirebaseRestClient
 {
@@ -18,11 +20,16 @@ namespace FirebaseRestClient
         internal enum ChildEventType { ValueChanged, ChildAdded, ChildChanged, ChildRemoved }
         internal ChildEventType childEventType;
 
+        internal bool shallow = false;
+
         public event Action<ChildEventArgs> OnChildEventReceived;
 
         private readonly MemoryStream dataStream = new MemoryStream(1024);
 
         private bool isInitial = true; //if first call
+
+        private List<Dictionary<string, Dictionary<string, fsData>>> nodes = new List<Dictionary<string, Dictionary<string, fsData>>>();
+
 
         protected override bool ReceiveData(byte[] data, int dataLength)
         {
@@ -44,6 +51,7 @@ namespace FirebaseRestClient
 
             return true;
         }
+
 
         void FilterReceivedData(string s)
         {
@@ -68,8 +76,8 @@ namespace FirebaseRestClient
             if (s.Contains("data"))
             {
                 if (eventType == ReceivedEventType.KeepAlive) return;
-                
-                /* THIS PART SHOULD BE IMPROVED WITH BETTER SOLUTION, FOR NOW IT'S WORKING AND DYNAMIC
+
+                /* TODO THIS PART SHOULD BE IMPROVED WITH BETTER SOLUTION, FOR NOW IT'S WORKING AND DYNAMIC
                  * What are we doing -
                  * 1. Splitting out Path(string) and Data(json)
                  * */
@@ -81,20 +89,37 @@ namespace FirebaseRestClient
                 {
                     isInitial = false;
                     OnChildEventReceived?.Invoke(new ChildEventArgs(pathString, dataString, true));
+                    var resData = fsJsonParser.Parse(dataString);
+                    if(childEventType == ChildEventType.ChildAdded) GetSnapshot(resData, ""); //store snapshot
                     return;
-                }               
+                }
 
                 switch (eventType)
                 {
                     case ReceivedEventType.Put:
                         if (childEventType == ChildEventType.ValueChanged)
                             OnChildEventReceived?.Invoke(new ChildEventArgs(pathString, dataString, false));
-                        if(childEventType == ChildEventType.ChildAdded)
-                            OnChildEventReceived?.Invoke(new ChildEventArgs(pathString, dataString, false));
-                        if(childEventType == ChildEventType.ChildRemoved && dataString == "null")
-                            OnChildEventReceived?.Invoke(new ChildEventArgs(pathString, dataString, false));
+                        
+                        //Child Added Event
+                        if (childEventType == ChildEventType.ChildAdded)
+                        {
+                            if (shallow && pathString.Split('/').Length > 1) return;
 
-                        //check data null second split
+                            if (!CheckCachedChild(pathString)) //make sure that it doesn't exist in snapshot
+                            {
+                                OnChildEventReceived?.Invoke(new ChildEventArgs(pathString, dataString, false));
+                                AddToSnapshot(pathString, dataString); //add that child to snapshot
+                            }
+                        }
+
+                        //Child Removed Event
+                        if (childEventType == ChildEventType.ChildRemoved && dataString == "null")
+                            OnChildEventReceived?.Invoke(new ChildEventArgs(pathString, dataString, false));
+                        
+                        //Child Changed Event
+                        if (childEventType == ChildEventType.ChildChanged)
+                            OnChildEventReceived?.Invoke(new ChildEventArgs(pathString, dataString, false));
+                        
                         break;
                     case ReceivedEventType.Patch:
                         if (childEventType == ChildEventType.ValueChanged)
@@ -106,22 +131,101 @@ namespace FirebaseRestClient
                         break;
                 }
             }
-            //path okay, data null == remove 
+
+            void GetSnapshot(fsData data, string path, bool isNested = false)
+            {
+                var dict = data.AsDictionary;
+                foreach (var key in dict.Keys.ToList())
+                {
+                    if (!shallow && dict[key].IsDictionary) //If any nested child available
+                    {
+                        string newPath = String.IsNullOrEmpty(path) ? key : path + "/" + key;
+                        GetSnapshot(dict[key],  newPath , true); 
+                    }
+                    dict[key] = new fsData(""); //makes value null for optimization
+                }
+
+                //Store in a list, key is node path, value is dictionary of childs, fsData is always empty string
+                nodes.Add(new Dictionary<string, Dictionary<string, fsData>> { { path, dict } });
+            }
+
+            void AddToSnapshot(string path, string jsonData)
+            {
+                string[] splittedPath = path.Split('/');
+                string parentNode = splittedPath.Length > 1 ? path.Replace($"/{splittedPath[splittedPath.Length - 1]}", "") : "";
+
+
+                var targetedDict = new Dictionary<string, fsData>();
+
+                foreach (var node in nodes)
+                {
+                    foreach (var child in node.Keys.ToList())
+                    {
+                        if (child == parentNode) targetedDict = node[child];
+                    }
+                }
+
+                if (targetedDict.Keys.ToList().IndexOf(splittedPath[splittedPath.Length - 1]) == -1)
+                {
+                    var fsData = fsJsonParser.Parse(jsonData);
+
+                    if (fsData.IsDictionary)
+                    {
+                        GetSnapshot(fsData, path); //store snapshot
+                    }
+                    else 
+                    {
+                        targetedDict.Add(splittedPath[splittedPath.Length - 1], new fsData(""));
+                    }
+                }
+            }
+
+            bool CheckCachedChild(string path)
+            {
+                // nodes is a list of Dictionary. 
+                // Each dictionary = each node from initial path
+                //
+                // Each dictionary (node) from list has the following pair-
+                // Key = path from initial path e.g /users 
+                // Value = another dictionary of Childs of the following path (/users)
+                //
+                // Dictionary of value has following pair -
+                // Key = child node name e.g srejonkhan. Remember, it's being concatenated with node key. users + "/" + srejonkhan
+                // Value = fsData, contains child data. Eventually turned into a empty string for optimization.
+                //    
+                // A node get in depth of database to avoid miscommunication with update child event.
+                // It's better to listen to shallow child
+
+
+                foreach (var node in nodes)//Get each node
+                {
+                    foreach (var nestedChildNode in node) //get each child node from node dictionary
+                    {
+                        foreach (var nestedChild in nestedChildNode.Value) //loop through each child
+                        {
+                            string nodePath = String.IsNullOrEmpty(nestedChildNode.Key) ? nestedChild.Key : nestedChildNode.Key + "/" + nestedChild.Key;
+                            if (nodePath == path) return true; //Child exists
+                        }
+                    }
+                }
+                return false;
+            }
+        }
+    }
+
+    public struct ChildEventArgs
+    {
+        public bool isInitial;
+        public string path; //relative path
+        public string data;
+
+        public ChildEventArgs(string path, string data, bool isInitial)
+        {
+            this.path = path;
+            this.data = data;
+            this.isInitial = isInitial;
         }
     }
 }
 
 
-public struct ChildEventArgs
-{
-    public bool isInitial;
-    public string path; //relative path
-    public string data;
-
-    public ChildEventArgs(string path, string data, bool isInitial)
-    {
-        this.path = path;
-        this.data = data;
-        this.isInitial = isInitial;
-    }
-}

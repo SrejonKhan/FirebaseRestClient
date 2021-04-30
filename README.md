@@ -4,6 +4,8 @@ Lightweight Firebase Library, made on top of REST API.
 
 Implement Firebase to any Project without importing any Firebase SDK. This Library comes with all major features of Firebase SDK, including Realtime Database, Authentication, Storage and others are coming soon.
 
+[Discord Server](https://discord.gg/vsXYmnRtC3)
+
 # Installation
 
 Open Package Manager in Unity and Click on Plus Icon -> Add package from git URL, paste following link `https://github.com/SrejonKhan/FirebaseRestClient.git` and click Add.
@@ -90,6 +92,8 @@ More Features are being added on regular basis.
 
 # Example
 
+This is a general documentation. In future, there will be fully explained video and Knowledgebase. For any immediate support or discussion, join the [Discord Server](https://discord.gg/vsXYmnRtC3).
+
 ## Realtime Database
 
 ### Initialize
@@ -101,11 +105,11 @@ var firebase = new RealtimeDatabase();
 ### Read
 
 ```csharp
-firebase.Child("users").Read<User>().OnSuccess(result =>
+firebase.Child("users").Read<User>().OnSuccess(res =>
 {
-    //Returns result in Dictionary<string,User> (Dictionary<string,T>)
+    //Returns response in Dictionary<string,User> (Dictionary<string,T>)
     //item.value.id is a property of user class
-    foreach (var item in result)
+    foreach (var item in res)
         Debug.Log($"Key: {item.Key} - Value: {item.Value.id}\n");
 }).
 OnError(error =>
@@ -113,17 +117,25 @@ OnError(error =>
     Debug.LogError(error.Message);
 });
 
-firebase.Child("scores").Read().OnSuccess(result =>
+firebase.Child("scores").Read().OnSuccess(res =>
 {
-    //Returns result in Dictionary<string,string>
-    foreach (var item in result)
+    //Returns response in Dictionary<string,string>
+    foreach (var item in res)
         Debug.Log($"Name: {item.Key} - score: {item.Value}\n");
 });
 
-firebase.Child("product").Child("orange").RawRead().OnSuccess(result =>
+firebase.Child("product").Child("orange").RawRead().OnSuccess(res =>
 {
-    //Returns result in Json string
-    Debug.Log(result);
+    //Returns response in Json string
+    Debug.Log(res);
+});
+
+firebase.Child("notices/51").ReadValue().OnSuccess(res =>
+{
+    //response can be in Json or simple string value
+    //JSON will be returned if child value is an json object
+    //simple string value will be returned if child value represents key-pair value
+    Debug.Log(res);
 });
 ```
 
@@ -187,11 +199,104 @@ firebase.Child("product").Child("orange").Remove().OnSuccess( () => { /*...Codes
 firebase.Child("product").Child("orange").Remove();
 ```
 
+### ChildEvents
+
+There are 4 types of Events available in this library.
+
+1. ChildAdded
+2. ChildRemoved
+3. ChildChanged
+4. ValueChanged
+
+#### ChildAdded
+
+Listen for Child addition to targeted path and in-depth.
+
+Recommended not to use in root level, as internally a snapshot creates and run query internally on each `put` response from server to differenciate among Update and Addition.
+
+If it is required to listen in root level childs only, use `bool shallow = true` for listen to surface level child, not in-depth childs.
+
+```csharp
+firebase.Child("notices").ChildAdded(res =>
+{
+    //Firebase send full snapshot of child node, you can ignore by checking isInitial
+    if (res.isInitial)
+        Debug.Log(res.path + " | " + res.data);
+
+    //This is real snapshot of event, you will get Json from res.data
+    else
+        Debug.Log(res.path + "\n" + res.data);
+});
+
+//Shallow Read
+firebase.Child("users").ChildAdded(res =>
+{ /*...Codes...*/ }, true); //true indicates shallow read, by default is false
+```
+
+#### ChildRemoved
+
+Listen for Child Remove at any level from targeted path.
+
+```csharp
+firebase.Child("users").ChildRemoved(res =>
+{
+    //Firebase send full snapshot of child node, you can ignore by checking isInitial
+    if (res.isInitial)
+        Debug.Log(res.path + " | " + res.data);
+
+    //This is real snapshot of event, you will get null from res.data
+    else
+        Debug.Log(res.path + "\n" + res.data);
+});
+```
+
+#### ChildChanged
+
+Combination of both ChildAdded and ChildRemoved.
+
+<p align="center">
+  <img width="70%" src="Documentation/Media/child_events_meme.jpg">
+</p>
+
+```csharp
+firebase.Child("messages").ChildChanged(res =>
+{
+    //Firebase send full snapshot of child node, you can ignore by checking isInitial
+    if (res.isInitial)
+        Debug.Log(res.path + " | " + res.data);
+
+    //This is real snapshot of event, you will get Json or null from res.data
+    else
+        Debug.Log(res.path + "\n" + res.data);
+});
+```
+
+Remember, as `ChildChanged` listen to both Add and Remove event, to make differentiate, check `if(res.data == "null")`. If server returns `null` in string format, that means a child was removed at specific path.
+
+#### ValueChanged
+
+Union of all server events.
+
+```csharp
+firebase.ValueChanged(res =>
+{
+    //Firebase send full snapshot of child node, you can ignore by checking isInitial
+    if (res.isInitial)
+        Debug.Log(res.path + " | " + res.data);
+
+    //This is real snapshot of event, you will get Json or null from res.data
+    else
+        Debug.Log(res.path + "\n" + res.data);
+});
+```
+
 ### Order
 
 Order functions return a Json String. **Remember, returned JSON isn't in order, as JSON interpreters don't enforce any ordering.** Same applies to any filtered result.
 
 If you want to order, you have to order itself in application. I'm planning to write a helper function to order json in future updates.
+
+Remember, before using order function, make sure to [**Index your Database Rules**](https://firebase.google.com/docs/database/security/indexing-data). You can use `OnError` callback before setting up a index rules. `OnError` will throw error and tell exactly what is needed to add in index rules.
 
 ```csharp
 firebase.Child("users").OrderByKey().OnSuccess(json =>

@@ -1,3 +1,16 @@
+## [0.7.0] - 01-05-2021
+
+New `ReadValue()` function in Realtime Database.
+
+### Added
+
+- Direct Value Read from child `ReadValue()` (Realtime Database)
+- Database Events explanation added in README
+
+### Fixed
+
+- ChildAdded event fixed with cached snapshot
+
 ## [0.6.9] - 21-04-2021
 
 Google SignIn Standalone loopback enhanced and sdk implementation guide
