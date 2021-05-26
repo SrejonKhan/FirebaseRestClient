@@ -95,10 +95,16 @@ namespace FirebaseRestClient
                 }
 
                 switch (eventType)
-                {
+                {                           
+                    //TODO Shallow method for all events
                     case ReceivedEventType.Put:
+                        //Value Changed Event
                         if (childEventType == ChildEventType.ValueChanged)
+                        {
+                            if (shallow && pathString.Split('/').Length > 1) return;
+
                             OnChildEventReceived?.Invoke(new ChildEventArgs(pathString, dataString, false));
+                        }
                         
                         //Child Added Event
                         if (childEventType == ChildEventType.ChildAdded)
@@ -114,11 +120,19 @@ namespace FirebaseRestClient
 
                         //Child Removed Event
                         if (childEventType == ChildEventType.ChildRemoved && dataString == "null")
+                        {
+                            if (shallow && pathString.Split('/').Length > 1) return;
+
                             OnChildEventReceived?.Invoke(new ChildEventArgs(pathString, dataString, false));
-                        
+                        }
+
                         //Child Changed Event
                         if (childEventType == ChildEventType.ChildChanged)
+                        {
+                            if (shallow && pathString.Split('/').Length > 1) return;
+
                             OnChildEventReceived?.Invoke(new ChildEventArgs(pathString, dataString, false));
+                        }
                         
                         break;
                     case ReceivedEventType.Patch:
@@ -134,6 +148,8 @@ namespace FirebaseRestClient
 
             void GetSnapshot(fsData data, string path, bool isNested = false)
             {
+                if (!data.IsDictionary) return;
+
                 var dict = data.AsDictionary;
                 foreach (var key in dict.Keys.ToList())
                 {

@@ -5,20 +5,40 @@ using UnityEngine;
 
 namespace FirebaseRestClient
 {
-    public class ObjectCallback <T1>
+    public class ObjectCallback <T>
     {
-        internal Action<T1> successCallback;
+        internal Action<T> successCallback;
         internal Action<Exception> exceptionCallback;
 
         internal string hasChildNode;
 
-        public ObjectCallback<T1> OnSuccess(Action<T1> callback)
+        public ObjectCallback<T> OnSuccess(Action<T> callback)
         {
             successCallback += callback;
             return this;
         }
 
-        public ObjectCallback<T1> OnError(Action<Exception> callback)
+        public ObjectCallback<T> OnError(Action<Exception> callback)
+        {
+            exceptionCallback += callback;
+            return this;
+        }
+    }
+
+    public class ObjectCallback
+    {
+        internal Action<object> successCallback;
+        internal Action<Exception> exceptionCallback;
+
+        internal string hasChildNode;
+
+        public ObjectCallback OnSuccess(Action<object> callback)
+        {
+            successCallback += callback;
+            return this;
+        }
+
+        public ObjectCallback OnError(Action<Exception> callback)
         {
             exceptionCallback += callback;
             return this;

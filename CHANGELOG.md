@@ -1,3 +1,27 @@
+## [0.7.1] - 26-05-2021
+
+Major improvement to Realtime Database.
+
+### Added
+
+- `WriteKeyValuePair()` added, to write key-value pair
+- `WriteValue()` added, to write value to selected child/key
+- `ReadValue()` added, to read value of key as Json String or primitive type object.
+- `ReadKeyValuePairs()` added, to read string key-value pairs easily as dictionary. `ReadKeyValuePairs<T>()` for define type to deserialize as value.
+-
+
+### Changed
+
+- `Read<T>()` function improved, automatically converts to type T from json.
+- Added Shallow read to `RawRead()` function.
+- `Update()` function improved, supports object as value param. Automatically define which value to send to server.
+- Added Shallow functionality to server events- `ValueChanged()`, `ChildAdded()`, `ChildRemoved()`,`ChildChanged().
+- Filtering improved. Easier to filter `StartAt()`, `EndAt()`, `EqualTo()`.
+
+### Fixed
+
+- Some general issues were fixed during improvement.
+
 ## [0.7.0] - 01-05-2021
 
 New `ReadValue()` function in Realtime Database.

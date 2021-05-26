@@ -96,6 +96,46 @@ This is a general documentation. In future, there will be fully explained video 
 
 ## Realtime Database
 
+### Reference
+
+```csharp
+new RealtimeDatabase().ReadKeyValuePairs<User>();
+new RealtimeDatabase().ReadKeyValuePairs();
+new RealtimeDatabase().ReadValue();
+
+new RealtimeDatabase().RawRead();
+new RealtimeDatabase().RawRead(true);
+new RealtimeDatabase().Read<User>();
+
+new RealtimeDatabase().Push(user);
+new RealtimeDatabase().Push(jsonString);
+
+new RealtimeDatabase().WriteValue(user);
+new RealtimeDatabase().WriteValue(jsonString);
+new RealtimeDatabase().WriteKeyValuePair("key","value");
+new RealtimeDatabase().WriteKeyValuePair("key","value", true);
+
+new RealtimeDatabase().Update(user);
+new RealtimeDatabase().Update(jsonString);
+
+new RealtimeDatabase().ChildAdded(res => { });
+new RealtimeDatabase().ChildRemoved(res => { });
+new RealtimeDatabase().ChildChanged(res => { });
+new RealtimeDatabase().ValueChanged(res => { });
+
+new RealtimeDatabase().OrderByKey().OnSuccess(json => { });
+new RealtimeDatabase().OrderByValue().OnSuccess(json => { });
+new RealtimeDatabase().OrderByChild("id").OnSuccess(json => { });
+
+new RealtimeDatabase().LimitToFirst(10).OrderByChild("id").OnSuccess(json => { });
+new RealtimeDatabase().LimitToLast(5).OrderByChild("id").OnSuccess(json => { });
+new RealtimeDatabase().StartAt(25).OrderByChild("id").OnSuccess(json => { });
+new RealtimeDatabase().EndAt(125).OrderByChild("id").OnSuccess(json => { });
+new RealtimeDatabase().EqualTo("srejon").OrderByChild("username").OnSuccess(json => { });
+
+string pushId = new RealtimeDatabase().GeneratePushID();
+```
+
 ### Initialize
 
 ```csharp
@@ -105,23 +145,40 @@ var firebase = new RealtimeDatabase();
 ### Read
 
 ```csharp
-firebase.Child("users").Read<User>().OnSuccess(res =>
+firebase.Child("users").ReadKeyValuePairs().OnSuccess(res =>
 {
-    //Returns response in Dictionary<string,User> (Dictionary<string,T>)
+    //Returns response in Dictionary<string,string> (Dictionary<string,string>)
     //item.value.id is a property of user class
     foreach (var item in res)
-        Debug.Log($"Key: {item.Key} - Value: {item.Value.id}\n");
+        Debug.Log($"Key: {item.Key} - Value: {item.Value}\n");
 }).
 OnError(error =>
 {
     Debug.LogError(error.Message);
 });
 
-firebase.Child("scores").Read().OnSuccess(res =>
+firebase.Child("users").ReadKeyValuePairs<User>().OnSuccess(res =>
 {
-    //Returns response in Dictionary<string,string>
+    //Returns response in Dictionary<string,User> (Dictionary<string,T>)
+    //item.value.id is a property of user class
     foreach (var item in res)
-        Debug.Log($"Name: {item.Key} - score: {item.Value}\n");
+        Debug.Log($"Key: {item.Key} - Value: {item.Value.id}\n");
+});
+
+firebase.Child("notices/51").ReadValue().OnSuccess(res =>
+{
+    //response can be in Json or simple string value
+    //JSON will be returned if child value is an json object
+    //simple string value will be returned if child value represents key-pair value
+    Debug.Log(res);
+});
+
+firebase.Child("user/999").Read<User>().OnSuccess(res =>
+{
+    //response will be converted to desired type
+    //Throws JsonUtilty error if couldn't be converted to desired type
+    //best case to use when value is known as an object
+    Debug.Log(res);
 });
 
 firebase.Child("product").Child("orange").RawRead().OnSuccess(res =>
@@ -130,11 +187,10 @@ firebase.Child("product").Child("orange").RawRead().OnSuccess(res =>
     Debug.Log(res);
 });
 
-firebase.Child("notices/51").ReadValue().OnSuccess(res =>
+//Shallow
+firebase.Child("product").Child("orange").RawRead(true).OnSuccess(res =>
 {
-    //response can be in Json or simple string value
-    //JSON will be returned if child value is an json object
-    //simple string value will be returned if child value represents key-pair value
+    //Returns response in Json string
     Debug.Log(res);
 });
 ```
@@ -168,17 +224,21 @@ firebase.Child("users").Push(jsonString).OnSuccess(uid =>
 ### Write
 
 ```csharp
-// Object as payload
-firebase.Child("product").Child("orange").Write(anyObject).OnSuccess( () =>
+// Write to specific node
+// Object as payload, it can be any datatypes, even raw Json
+firebase.Child("product").Child("orange").WriteValue(anyObject).OnSuccess( () =>
 {
     Debug.Log("Successfully written.");
 });
 
-// Key and Value Pair, suitable for key-value pair leaderboard or similar.
-firebase.Child("leaderboard").Write("player123", "123");
+firebase.Child("product").Child("orange").WriteValue(123);
+firebase.Child("product").Child("orange").WriteValue(324.25f);
+firebase.Child("product").Child("stockout").WriteValue(true);
 
-// Json string as Payload
-firebase.Child("product").Child("orange").Write(jsonString);
+
+// Key and Value Pair, suitable for key-value pair leaderboard or similar.
+firebase.Child("leaderboard").WriteKeyValuePair("player123", "123");
+firebase.Child("leaderboard").WriteKeyValuePair("player321", "521", true); //append to parent
 ```
 
 ### Update
@@ -189,6 +249,11 @@ firebase.Child("users").Child("123").Update(user).OnSuccess( () => { /*...Codes.
 
 // Json string as payload
 firebase.Child("users").Child("123").Update(jsonString);
+
+// Primitive datatype as payload
+firebase.Child("users").Child("123").Update(5654.5f);
+firebase.Child("users").Child("123").Update(123);
+firebase.Child("users").Child("123").Update(false);
 ```
 
 ### Remove
@@ -212,7 +277,7 @@ There are 4 types of Events available in this library.
 
 Listen for Child addition to targeted path and in-depth.
 
-Recommended not to use in root level, as internally a snapshot creates and run query internally on each `put` response from server to differenciate among Update and Addition.
+Recommended not to use in root level, as internally a snapshot creates and run query internally on each `put` response from server to differentiate among Update and Addition.
 
 If it is required to listen in root level childs only, use `bool shallow = true` for listen to surface level child, not in-depth childs.
 
@@ -248,6 +313,10 @@ firebase.Child("users").ChildRemoved(res =>
     else
         Debug.Log(res.path + "\n" + res.data);
 });
+
+//Shallow Read
+firebase.Child("users").ChildRemoved(res =>
+{ /*...Codes...*/ }, true); //true indicates shallow read, by default is false
 ```
 
 #### ChildChanged
@@ -269,6 +338,10 @@ firebase.Child("messages").ChildChanged(res =>
     else
         Debug.Log(res.path + "\n" + res.data);
 });
+
+//Shallow Read
+firebase.Child("users").ChildChanged(res =>
+{ /*...Codes...*/ }, true); //true indicates shallow read, by default is false
 ```
 
 Remember, as `ChildChanged` listen to both Add and Remove event, to make differentiate, check `if(res.data == "null")`. If server returns `null` in string format, that means a child was removed at specific path.
@@ -288,6 +361,10 @@ firebase.ValueChanged(res =>
     else
         Debug.Log(res.path + "\n" + res.data);
 });
+
+//Shallow Read
+firebase.Child("users").ValueChanged(res =>
+{ /*...Codes...*/ }, true); //true indicates shallow read, by default is false
 ```
 
 ### Order
