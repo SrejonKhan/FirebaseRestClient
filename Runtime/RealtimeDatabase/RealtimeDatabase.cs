@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
 
@@ -100,15 +101,16 @@ namespace FirebaseRestClient
         {
             GeneralCallback callbackHandler = new GeneralCallback();
 
-            string json = GenerateJson(value);
+            object json = GenerateBody(value);
             string upperNodePath = GetImmediateUpperNode();
-            
+            Debug.Log("JSON - " + json);
+
             RequestHelper req = new RequestHelper
             {
-                Uri = FirebaseConfig.endpoint + upperNodePath + ".json" + GetAuthParam(),
-                BodyString = json
+                Uri = FirebaseConfig.endpoint + path + ".json" + GetAuthParam(),
+                BodyString = json.ToString()
             };
-
+            Debug.Log("Path - " + req.Uri);
             RESTHelper.PutJson(req, res =>
             {
                 callbackHandler.successCallback?.Invoke();
@@ -272,7 +274,7 @@ namespace FirebaseRestClient
         /// <summary>
         /// Read value of key
         /// </summary>
-        /// <returns>Json Object as Json String, else object</returns>
+        /// <returns>Value as Json String, else object</returns>
         public ObjectCallback ReadValue()
         {
             ObjectCallback callbackHandler = new ObjectCallback();
@@ -303,7 +305,7 @@ namespace FirebaseRestClient
         /// <summary>
         /// Read key-value pairs
         /// </summary>
-        /// <returns>Dictionary, both key and value is object, it can be any primitative types or fsData</returns>
+        /// <returns>Dictionary, key is string and value is object, it can be any primitive types or fsData</returns>
         public DictionaryCallback<string, object> ReadKeyValuePairs()
         {
             DictionaryCallback<string, object> callbackHandler = new DictionaryCallback<string, object>();
@@ -323,7 +325,7 @@ namespace FirebaseRestClient
                 }
                 //No collection, single result (key-value pair)
                 string[] splittedPaths = path.Split('/');
-                destructuredRes.Add(splittedPaths[splittedPaths.Length - 1], resData._value.ToString()); //last path as key, resData._value as value
+                destructuredRes.Add(splittedPaths[splittedPaths.Length - 1], resData._value); //last path as key, resData._value as object
                 callbackHandler.successCallback?.Invoke(destructuredRes);
             },
             err =>
@@ -756,8 +758,13 @@ namespace FirebaseRestClient
             "}";
 
             var paramType = value.GetType();
+            //We should not handle Array implicitly. It will be poor for end-user while deserializing.
+            if (paramType.IsArray) 
+            {
+                throw new ArgumentException("Parameter cannnot be Array. Convert Array to JSON String and pass as string.");
+            }
             //If param is not primitive, convert to json
-            if (!paramType.IsPrimitive && paramType != typeof(String))
+            if (!paramType.IsPrimitive && paramType != typeof(string))
             {
                 string paramJson = JsonUtility.ToJson(value);
                 json = "{" +
@@ -766,7 +773,7 @@ namespace FirebaseRestClient
                 return json;
             }
             //if normal string, wrap with quote
-            if (paramType == typeof(String))
+            if (paramType == typeof(string))
             {
                 string paramString = value.ToString();
                 int length = paramString.Length;
@@ -779,6 +786,7 @@ namespace FirebaseRestClient
                     return json;
                 }
             }
+
             //bool type should to lowercase to work in json
             if (paramType == typeof(bool))
             {
@@ -787,6 +795,47 @@ namespace FirebaseRestClient
                 "}";
             }
             return json;
+        }
+
+        /// <summary>
+        /// Generate server friendly body
+        /// </summary>
+        /// <param name="value">Any datatypes</param>
+        /// <returns>Object, in JSON String or any primitive Datatype.</returns>
+        object GenerateBody(object value)
+        {
+            object body = value;
+            var paramType = value.GetType();
+
+            //We should not handle Array implicitly. It will be poor for end-user while deserializing.
+            if (paramType.IsArray || paramType.IsGenericType && paramType.GetGenericTypeDefinition() == typeof(IList<>))
+            {
+                throw new ArgumentException("Parameter cannnot be Array. Convert Array to JSON String and pass as string.");
+            }
+            //If param is not primitive, convert to json
+            if (!paramType.IsPrimitive && paramType != typeof(string))
+            {
+                body = JsonUtility.ToJson(value);
+                return body;
+            }
+            //if normal string, wrap with quote
+            if (paramType == typeof(string))
+            {
+                string paramString = value.ToString();
+                int length = paramString.Length;
+                //make sure it's not json, if json, leave as it is.
+                if (paramString[0] != '{' && paramString[length - 1] != '}')
+                {
+                    body = $"\"{value}\"";
+                    return body;
+                }
+            }
+            //bool type should to lowercase to work in json
+            if (paramType == typeof(bool))
+            {
+                body = value.ToString().ToLower();
+            }
+            return body;
         }
 
         /// <summary>
