@@ -1,4 +1,5 @@
-﻿using FullSerializer;
+﻿using FirebaseRestClient.Helper;
+using FullSerializer;
 using Proyecto26;
 using System;
 using System.Collections;
@@ -101,14 +102,43 @@ namespace FirebaseRestClient
         {
             GeneralCallback callbackHandler = new GeneralCallback();
 
-            object json = GenerateBody(value);
-            string upperNodePath = GetImmediateUpperNode();
-            Debug.Log("JSON - " + json);
+            string json = GenerateBody(value).ToString();
 
             RequestHelper req = new RequestHelper
             {
                 Uri = FirebaseConfig.endpoint + path + ".json" + GetAuthParam(),
-                BodyString = json.ToString()
+                BodyString = json
+            };
+            Debug.Log("Path - " + req.Uri);
+            RESTHelper.PutJson(req, res =>
+            {
+                callbackHandler.successCallback?.Invoke();
+            },
+            err =>
+            {
+                callbackHandler.exceptionCallback?.Invoke(err);
+            });
+
+            return callbackHandler;
+        }
+
+        /// <summary>
+        /// Write Dictionary to specified reference
+        /// </summary>
+        /// <typeparam name="T1">Value type</typeparam>
+        /// <param name="dictionary">Dictionary that will be written</param>
+        /// <returns></returns>
+        public GeneralCallback WriteValueAsDictionary<T1>(Dictionary<string, T1>dictionary)
+        {
+            GeneralCallback callbackHandler = new GeneralCallback();
+
+            string json = SerializerHelper.Serialize(typeof(Dictionary<string,T1>), dictionary);
+
+            Debug.Log(json); 
+            RequestHelper req = new RequestHelper
+            {
+                Uri = FirebaseConfig.endpoint + path + ".json" + GetAuthParam(),
+                BodyString = json
             };
             Debug.Log("Path - " + req.Uri);
             RESTHelper.PutJson(req, res =>
@@ -763,6 +793,11 @@ namespace FirebaseRestClient
             {
                 throw new ArgumentException("Parameter cannnot be Array. Convert Array to JSON String and pass as string.");
             }
+            //Serializing Dictionary from object needs expensive work-around. We use dictionary focused method.
+            if (paramType.IsGenericType && paramType.GetGenericTypeDefinition() == typeof(Dictionary<,>))
+            {
+                throw new ArgumentException("Parameter cannnot be Dictionary. Use Dictionary Methods, e.g WriteValueAsDictionary()");
+            }
             //If param is not primitive, convert to json
             if (!paramType.IsPrimitive && paramType != typeof(string))
             {
@@ -811,6 +846,11 @@ namespace FirebaseRestClient
             if (paramType.IsArray || paramType.IsGenericType && paramType.GetGenericTypeDefinition() == typeof(IList<>))
             {
                 throw new ArgumentException("Parameter cannnot be Array. Convert Array to JSON String and pass as string.");
+            }
+            //Serializing Dictionary from object needs expensive work-around. We use dictionary focused method.
+            if (paramType.IsGenericType && paramType.GetGenericTypeDefinition() == typeof(Dictionary<,>))
+            {
+                throw new ArgumentException("Parameter cannnot be Dictionary. Use Dictionary Methods, e.g WriteValueAsDictionary()");
             }
             //If param is not primitive, convert to json
             if (!paramType.IsPrimitive && paramType != typeof(string))
