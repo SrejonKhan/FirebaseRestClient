@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace FirebaseRestClient
+namespace FirebaseRestClient.Helper
 {
     public class UnityMainThread : MonoBehaviour
     {

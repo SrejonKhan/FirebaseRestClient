@@ -4,6 +4,7 @@ using UnityEngine;
 using Proyecto26;
 using UnityEngine.Networking;
 using System;
+using FirebaseRestClient.Helper;
 
 namespace FirebaseRestClient
 {

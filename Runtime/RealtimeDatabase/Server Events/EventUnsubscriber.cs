@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Proyecto26;
+using FirebaseRestClient.Helper;
 
 namespace FirebaseRestClient
 {
