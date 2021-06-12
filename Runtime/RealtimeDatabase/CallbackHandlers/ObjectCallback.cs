@@ -10,8 +10,6 @@ namespace FirebaseRestClient
         internal Action<T> successCallback;
         internal Action<Exception> exceptionCallback;
 
-        internal string hasChildNode;
-
         public ObjectCallback<T> OnSuccess(Action<T> callback)
         {
             successCallback += callback;
@@ -29,8 +27,6 @@ namespace FirebaseRestClient
     {
         internal Action<object> successCallback;
         internal Action<Exception> exceptionCallback;
-
-        internal string hasChildNode;
 
         public ObjectCallback OnSuccess(Action<object> callback)
         {

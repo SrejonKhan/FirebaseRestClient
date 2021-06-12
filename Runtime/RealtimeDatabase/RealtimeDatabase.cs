@@ -109,7 +109,7 @@ namespace FirebaseRestClient
                 Uri = FirebaseConfig.endpoint + path + ".json" + GetAuthParam(),
                 BodyString = json
             };
-            Debug.Log("Path - " + req.Uri);
+
             RESTHelper.PutJson(req, res =>
             {
                 callbackHandler.successCallback?.Invoke();

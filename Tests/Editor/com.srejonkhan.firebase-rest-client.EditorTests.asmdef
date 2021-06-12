@@ -1,5 +1,5 @@
 {
-    "name": "com.srejonkhan.firebase-rest-client.Editor.Tests",
+    "name": "com.srejonkhan.firebase-rest-client.EditorTests",
     "references": [
         "GUID:3e3ceb15fc97715429bbf87fa32c6f43",
         "GUID:27619889b8ba8c24980f49ee34dbb44a",
