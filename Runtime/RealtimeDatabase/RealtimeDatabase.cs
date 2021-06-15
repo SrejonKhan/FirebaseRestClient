@@ -133,14 +133,13 @@ namespace FirebaseRestClient
             GeneralCallback callbackHandler = new GeneralCallback();
 
             string json = SerializerHelper.Serialize(typeof(Dictionary<string,T1>), dictionary);
-
-            Debug.Log(json); 
+ 
             RequestHelper req = new RequestHelper
             {
                 Uri = FirebaseConfig.endpoint + path + ".json" + GetAuthParam(),
                 BodyString = json
             };
-            Debug.Log("Path - " + req.Uri);
+
             RESTHelper.PutJson(req, res =>
             {
                 callbackHandler.successCallback?.Invoke();
@@ -536,7 +535,7 @@ namespace FirebaseRestClient
                 MonoBehaviour.DontDestroyOnLoad(unsubscriberGO);
             }
             //Error handling are being handled internally
-            RESTHelper.Get(req, err => RequestErrorHelper.ToDictionary(err).ToList().ForEach(x => Debug.Log(x.Key + " - " + x.Value)));
+            RESTHelper.Get(req, err => RequestErrorHelper.ToDictionary(err).ToList().ForEach(x => Debug.LogError(x.Key + " - " + x.Value)));
         }
 
         /// <summary>

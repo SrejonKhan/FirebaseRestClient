@@ -23,8 +23,7 @@ namespace FirebaseRestClient.Tests.Runtime
                 OnSuccess(() => isDone = true).
                 OnError(err =>
                 {
-                    RequestErrorHelper.ToDictionary(err).ToList().ForEach(x => errorMsg += x +"\n");
-                    //Debug.Log(errorMsg.);
+                    RequestErrorHelper.ToDictionary(err).ToList().ForEach(x => errorMsg += x + "\n");
                     isDone = true;
                 });
 
@@ -50,7 +49,6 @@ namespace FirebaseRestClient.Tests.Runtime
                 OnError(err =>
                 {
                     RequestErrorHelper.ToDictionary(err).ToList().ForEach(x => errorMsg += x + "\n");
-                    //Debug.Log(errorMsg.);
                     isDone = true;
                 });
 
@@ -117,7 +115,7 @@ namespace FirebaseRestClient.Tests.Runtime
             bool isDone = false;
             string errorMsg = "";
 
-            var dictionary = new Dictionary<string, int>() 
+            var dictionary = new Dictionary<string, int>()
             {
                 {"orange", 145},
                 {"banana", 456 },
@@ -181,7 +179,7 @@ namespace FirebaseRestClient.Tests.Runtime
             string jsonResult = "";
 
             firebase.Child("unitTest/writeValueObject").RawRead().
-                OnSuccess(res => 
+                OnSuccess(res =>
                 {
                     isDone = true;
                     jsonResult = res;
@@ -189,7 +187,6 @@ namespace FirebaseRestClient.Tests.Runtime
                 OnError(err =>
                 {
                     RequestErrorHelper.ToDictionary(err).ToList().ForEach(x => errorMsg += x + "\n");
-                    //Debug.Log(errorMsg.);
                     isDone = true;
                 });
 
@@ -333,15 +330,14 @@ namespace FirebaseRestClient.Tests.Runtime
             var obj = new TestObject();
 
             firebase.Child("unitTest/push").Push(obj).
-                OnSuccess(res => 
-                { 
+                OnSuccess(res =>
+                {
                     isDone = true;
-                    pushId = res;                    
+                    pushId = res;
                 }).
                 OnError(err =>
                 {
                     RequestErrorHelper.ToDictionary(err).ToList().ForEach(x => errorMsg += x + "\n");
-                    //Debug.Log(errorMsg.);
                     isDone = true;
                 });
 
@@ -360,8 +356,8 @@ namespace FirebaseRestClient.Tests.Runtime
             bool isDone = false;
             string errorMsg = "";
             string pushId = null;
-            
-            string json = JsonUtility.ToJson(new TestObject(1,"PushedName"));
+
+            string json = JsonUtility.ToJson(new TestObject(1, "PushedName"));
 
             firebase.Child("unitTest/push").Push(json).
                 OnSuccess(res =>
@@ -372,7 +368,6 @@ namespace FirebaseRestClient.Tests.Runtime
                 OnError(err =>
                 {
                     RequestErrorHelper.ToDictionary(err).ToList().ForEach(x => errorMsg += x + "\n");
-                    //Debug.Log(errorMsg.);
                     isDone = true;
                 });
 
@@ -423,7 +418,7 @@ namespace FirebaseRestClient.Tests.Runtime
                 });
 
             }).
-            OnError(err => 
+            OnError(err =>
             {
                 RequestErrorHelper.ToDictionary(err).ToList().ForEach(x => errorMsg += x + "\n");
                 isDone = true;
@@ -536,15 +531,202 @@ namespace FirebaseRestClient.Tests.Runtime
 
             Assert.AreEqual(json, result, "Couldn't update properly.");
         }
+
+        [UnityTest, Order(16)]
+        public IEnumerator ChildAdded()
+        {
+            var firebase = new RealtimeDatabase();
+            bool isDone = false;
+            string errorMsg = "";
+            bool isInitialDone = false;
+
+            string json = JsonUtility.ToJson(new TestObject(111, "ChildAdd"));
+
+            firebase.Child("unitTest/childAdded").ChildAdded(cb =>
+            {
+                if (cb.isInitial)
+                {
+                    isInitialDone = true;
+                    return; 
+                }
+                isDone = true;
+                Assert.AreEqual(json, cb.data, "Encountered issue while parsing callback Data.");
+            });
+
+            yield return new WaitUntil(() => isInitialDone); //we wait for initial cb to reduce chance of race condition
+
+            firebase.Child("unitTest/childAdded").WriteValue(json).
+            OnError(err =>
+            {
+                RequestErrorHelper.ToDictionary(err).ToList().ForEach(x => errorMsg += x + "\n");
+                isDone = true;
+            });
+
+            yield return new WaitUntil(() => isDone);
+
+            if (errorMsg.Length > 0)
+                Assert.Fail(errorMsg);
+        }
+
+        [UnityTest, Order(17)]
+        public IEnumerator ChildRemoved()
+        {
+            var firebase = new RealtimeDatabase();
+            bool isDone = false;
+            string errorMsg = "";
+            bool isInitialDone = false;
+
+            string json = JsonUtility.ToJson(new TestObject(111, "ChildRemove"));
+
+            firebase.Child("unitTest/childRemoved").ChildRemoved(cb =>
+            {
+                if (cb.isInitial)
+                {
+                    isInitialDone = true;
+                    return;
+                }
+                isDone = true;
+                Assert.AreEqual("null", cb.data, "Encountered issue while parsing callback Data.");
+            });
+
+            yield return new WaitUntil(() => isInitialDone); //we wait for initial cb to reduce chance of race condition
+
+            firebase.Child("unitTest/childRemoved").WriteValue(json).OnSuccess(() =>
+            {
+                firebase.Child("unitTest/childRemoved").Remove().
+                OnError(err =>
+                {
+                    RequestErrorHelper.ToDictionary(err).ToList().ForEach(x => errorMsg += x + "\n");
+                    isDone = true;
+                });
+            }).
+            OnError(err =>
+            {
+                RequestErrorHelper.ToDictionary(err).ToList().ForEach(x => errorMsg += x + "\n");
+                isDone = true;
+            });
+
+            yield return new WaitUntil(() => isDone);
+
+            if (errorMsg.Length > 0)
+                Assert.Fail(errorMsg);
+        }
+
+        [UnityTest, Order(18)]
+        public IEnumerator ChildChanged()
+        {
+            var firebase = new RealtimeDatabase();
+            bool isDone = false;
+            string errorMsg = "";
+            int eventCount = 0;
+
+            bool isInitialDone = false;
+
+            bool hasWriteVal = false;
+            bool hasUpdatedVal = false;
+
+            string json = JsonUtility.ToJson(new TestObject(111, "ChildRemove"));
+
+            firebase.Child("unitTest/childChanged").ChildChanged(cb =>
+            {
+                if (cb.isInitial)
+                {
+                    isInitialDone = true;
+                    return;
+                }
+
+                switch (eventCount)
+                {
+                    //child added
+                    case 0:
+                        eventCount++;
+                        hasWriteVal = true;
+                        Assert.AreEqual(json, cb.data, "Encountered issue while parsing ChildAdded callback Data.");
+                        break;
+                    //child updated
+                    case 1:
+                        eventCount++;
+                        hasUpdatedVal = true;
+                        Assert.AreEqual(json, cb.data, "Encountered issue while parsing ChildUpdated callback Data.");
+                        break;
+                    //child removed
+                    case 2:
+                        eventCount++;
+                        Assert.AreEqual("null", cb.data, "Encountered issue while parsing ChildRemoved callback Data.");
+                        break;
+                }
+
+                if (eventCount == 2) isDone = true;
+            });
+
+            yield return new WaitUntil(() => isInitialDone); //we wait for initial cb to reduce chance of race condition
+
+            firebase.Child("unitTest/childChanged").WriteValue(json).OnError(err =>
+            {
+                hasWriteVal = true;
+                RequestErrorHelper.ToDictionary(err).ToList().ForEach(x => errorMsg += x + "\n");
+            });
+
+            yield return new WaitUntil(() => hasWriteVal);
+
+            json = JsonUtility.ToJson(new TestObject(123, "NewUpdated"));
+            firebase.Child("unitTest/childChanged").Update(json).OnError(err =>
+            {
+                hasUpdatedVal = true;
+                RequestErrorHelper.ToDictionary(err).ToList().ForEach(x => errorMsg += x + "\n"); 
+            });
+
+            yield return new WaitUntil(() => hasUpdatedVal);
+
+            firebase.Child("unitTest/childChanged").Remove().OnError(err =>
+            {
+                RequestErrorHelper.ToDictionary(err).ToList().ForEach(x => errorMsg += x + "\n");
+            });
+
+            yield return new WaitUntil(() => isDone);
+
+            if (errorMsg.Length > 0)
+                Assert.Fail(errorMsg);
+        }
+
+        [UnityTest, Order(19)]
+        public IEnumerator Remove()
+        {
+            //we make sure all event is cleared before proceeding with remove
+            var unsubscriberGO = GameObject.Find("FirebaseRestUnsubscriber");
+            if (unsubscriberGO != null)
+            {
+                MonoBehaviour.Destroy(unsubscriberGO);
+            }
+
+            var firebase = new RealtimeDatabase();
+            bool isDone = false;
+            string errorMsg = "";
+
+
+            firebase.Child("unitTest").Remove().OnSuccess(() => isDone = true).
+            OnError(err =>
+            {
+                RequestErrorHelper.ToDictionary(err).ToList().ForEach(x => errorMsg += x + "\n");
+                isDone = true;
+            });
+
+            yield return new WaitUntil(() => isDone);
+
+            if (errorMsg.Length > 0)
+            {
+                Assert.Fail(errorMsg);
+            }
+        }
     }
 
-    internal class TestObject 
+    internal class TestObject
     {
         public int id = 123;
         public string name = "default";
 
         public TestObject() { }
-        public TestObject(int id, string name) 
+        public TestObject(int id, string name)
         {
             this.id = id;
             this.name = name;
