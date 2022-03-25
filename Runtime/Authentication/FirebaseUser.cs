@@ -82,21 +82,22 @@ namespace FirebaseRestClient
 
             RESTHelper.Post(req, result =>
             {
-                Debug.Log(result);
                 var resData = fsJsonParser.Parse(result); //in JSON
                 object deserializedRes = null;
-                //callbackHandler.successCallback?.Invoke();
                 fsSerializer serializer = new fsSerializer();
-                serializer.TryDeserialize(resData, typeof(Dictionary<string, GetUserResponse>), ref deserializedRes);
+
+                // remove first kind key, we don't need this
+                var resDict = resData.AsDictionary;
+                resDict.Remove("kind");
+                resData._value = resDict;
+
+                serializer.TryDeserialize(resData, typeof(Dictionary<string, GetUserResponse[]>), ref deserializedRes);
 
                 Dictionary<string, GetUserResponse[]> destructuredRes = (Dictionary<string, GetUserResponse[]>)deserializedRes;
 
-                //var userData = JsonHelper.ArrayFromJson<GetUserResponse>(destructuredRes["users"])[0];
                 var userData = destructuredRes["users"];
 
-
-
-                //callbackHandler.successCallback?.Invoke(userData[0]);                    
+                callbackHandler.successCallback?.Invoke(userData[0].ToUser(this));
             },
             err =>
             {
