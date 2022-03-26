@@ -443,6 +443,103 @@ namespace FirebaseRestClient
 
         }
 
+        public AccessTokenCallback RefreshIdToken(string refreshToken)
+        {
+            AccessTokenCallback callbackHandler = new AccessTokenCallback();
+
+            string rawBody = "{" +
+            $"\"grant_type\":\"refresh_token\"," +
+            $"\"refresh_token\":\"{refreshToken}\"" + //refresh token
+            "}";
+
+
+            RequestHelper req = new RequestHelper
+            {
+                Uri = "https://securetoken.googleapis.com/v1/token",
+                Params = new Dictionary<string, string>
+                    {
+                        {"key",  FirebaseConfig.api}
+                    },
+                BodyString = rawBody
+            };
+
+            RESTHelper.Post(req, result =>
+            {
+                var resData = fsJsonParser.Parse(result); //in JSON
+                object deserializedRes = null;
+
+                fsSerializer serializer = new fsSerializer();
+                serializer.TryDeserialize(resData, typeof(Dictionary<string, string>), ref deserializedRes);
+
+                Dictionary<string, string> destructuredRes = (Dictionary<string, string>)deserializedRes;
+
+                var accessTokenRes = new AccessTokenResponse();
+                accessTokenRes.accessToken = destructuredRes["access_token"];
+                accessTokenRes.expiresIn = Int32.Parse(destructuredRes["expires_in"]);
+                accessTokenRes.tokenType = destructuredRes["token_type"];
+                accessTokenRes.refreshToken = destructuredRes["refresh_token"];
+                accessTokenRes.idToken = destructuredRes["id_token"];
+                accessTokenRes.userId = destructuredRes["user_id"];
+                accessTokenRes.projectId = destructuredRes["project_id"];
+
+                callbackHandler.successCallback?.Invoke(accessTokenRes);
+            },
+            err =>
+            {
+                callbackHandler.exceptionCallback?.Invoke(err);
+            });
+
+            return callbackHandler;
+        }
+
+        public GetUserCallback GetUserFromIdToken(string idToken)
+        {
+            if (currentUser == null)
+                currentUser = new FirebaseUser();
+
+            GetUserCallback callbackHandler = new GetUserCallback();
+
+            string rawBody = "{" +
+            $"\"idToken\":\"{idToken}\"," + //user id token
+            "}";
+
+            RequestHelper req = new RequestHelper
+            {
+                Uri = "https://identitytoolkit.googleapis.com/v1/accounts:lookup",
+                Params = new Dictionary<string, string>
+                    {
+                        {"key",  FirebaseConfig.api}
+                    },
+                BodyString = rawBody
+            };
+
+            RESTHelper.Post(req, result =>
+            {
+                var resData = fsJsonParser.Parse(result); //in JSON
+                object deserializedRes = null;
+                fsSerializer serializer = new fsSerializer();
+
+                // remove first kind key, we don't need this
+                var resDict = resData.AsDictionary;
+                resDict.Remove("kind");
+                resData._value = resDict;
+
+                serializer.TryDeserialize(resData, typeof(Dictionary<string, GetUserResponse[]>), ref deserializedRes);
+
+                Dictionary<string, GetUserResponse[]> destructuredRes = (Dictionary<string, GetUserResponse[]>)deserializedRes;
+
+                var userData = destructuredRes["users"];
+
+                callbackHandler.successCallback?.Invoke(userData[0].ToUser(currentUser));
+            },
+            err =>
+            {
+                callbackHandler.exceptionCallback?.Invoke(err);
+            });
+
+            return callbackHandler;
+        }
+
         public void SignOut() 
         {
             currentUser = null;

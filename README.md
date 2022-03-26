@@ -467,6 +467,9 @@ firebaseAuth.FacebookSignIn("AUTH_CODE_FROM_FACEBOOK_TO_EXCHANGE_ACCESS_TOKEN");
 
 firebaseAuth.SendPasswordResetEmail(email); //Password Reset Mail
 firebaseAuth.SendEmailVerification(); //Email Verification (user must be signed in)
+
+firebaseAuth.RefreshIdToken(refreshToken);
+firebaseAuth.GetUserFromIdToken(idToken);
 ```
 
 ### User Actions
@@ -517,6 +520,26 @@ void AuthStateChanged(object sender, System.EventArgs eventArgs)
     }
 }
 ```
+
+### Reauthenticate with Refresh Token
+We can reauthenticate user with Refresh Token. IdToken generally expires in one hour, where Refresh Token in Firebase usually long lived unless any major action taken to account (Password Change, Email change etc.). 
+
+Reauthentication should be done from the library, but as there is not any proper implementation for persistency, Library won't take liability of Reauthentication. Anyway, library provides some methods to reauthenticate from User side. 
+```csharp
+// Step 1 - Get new IdToken using Refresh Token 
+string refreshToken = /*Get refresh token*/;
+firebaseAuth.RefreshIdToken(refreshToken).
+OnSuccess(res => 
+{ 
+    // Step 2 - Get User using IdToken
+    firebaseAuth.GetUserFromIdToken(res.accessToken).
+    OnSucess(user => 
+    {
+        // user authenticated
+        // do your work
+    }); 
+});
+``` 
 
 ## Storage
 
