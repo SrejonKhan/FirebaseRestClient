@@ -33,8 +33,10 @@ namespace FirebaseRestClient
         public string LocalId { get => localId; }
         
         internal string refreshToken;
+        public string RefreshToken { get => refreshToken; }
 
         internal string accessToken;
+        public string AccessToken { get => accessToken; }
 
         internal string validSince;
         internal string lastLoginAt;
