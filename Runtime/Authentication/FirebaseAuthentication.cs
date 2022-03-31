@@ -530,7 +530,11 @@ namespace FirebaseRestClient
 
                 var userData = destructuredRes["users"];
 
-                callbackHandler.successCallback?.Invoke(userData[0].ToUser(currentUser));
+                var user = userData[0].ToUser(currentUser);
+                currentUser = user;
+                onStateChanged?.Invoke(this, null); //Invoke On State Change Event
+
+                callbackHandler.successCallback?.Invoke(user);
             },
             err =>
             {
