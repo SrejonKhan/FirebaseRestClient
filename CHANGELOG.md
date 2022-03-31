@@ -1,3 +1,12 @@
+## [0.7.2] - 31-03-2022
+
+Reauthentication Support.
+### Added
+
+- Manual Reauthentication support
+- `firebaseAuth.RefreshIdToken(refreshToken)` added, to refresh stored Id token.
+- `firebaseAuth.GetUserFromIdToken(idToken)` added, to get user from AccessToken.
+
 ## [0.7.1] - 26-05-2021
 
 Major improvement to Realtime Database.

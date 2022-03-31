@@ -1,6 +1,6 @@
 {
   "name": "com.srejonkhan.firebase-rest-client",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "displayName": "Firebase Rest Client",
   "description": "Lightweight Firebase Rest Client to implement Firebase to any Project without importing any Firebase SDK. This Library comes with all major features of Firebase SDK, including Realtime Database, Authentication and others are coming soon.",
   "unity": "2018.3",
