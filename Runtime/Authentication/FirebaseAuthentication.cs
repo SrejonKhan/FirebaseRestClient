@@ -531,6 +531,7 @@ namespace FirebaseRestClient
                 var userData = destructuredRes["users"];
 
                 var user = userData[0].ToUser(currentUser);
+                user.accessToken = idToken;
                 currentUser = user;
                 onStateChanged?.Invoke(this, null); //Invoke On State Change Event
 
