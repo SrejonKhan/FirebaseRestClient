@@ -410,8 +410,8 @@ namespace FirebaseRestClient
 
             RESTHelper.Get(route, res =>
             {
-                //If there is no child, server return "null", so we are checking if res text is greater than 4
-                if (res.Text.Length > 4)
+                //If there is no child, server return "null"
+                if (res.Text != "null" && res.Text.Length > 0)
                 {
                     callbackHandler.successCallback?.Invoke(true);
                 }
