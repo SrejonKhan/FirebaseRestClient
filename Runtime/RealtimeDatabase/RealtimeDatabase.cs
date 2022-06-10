@@ -514,28 +514,51 @@ namespace FirebaseRestClient
 
         void ChildEventListen(ChildEventHandler eventHandler)
         {
+#if !UNITY_WEBGL || UNITY_EDITOR
             RequestHelper req = new RequestHelper
             {
                 Headers = new Dictionary<string, string>
                 {
-                    { "Accept", "text/event-stream"}
+                    { "Accept", "text/event-stream"},
                 },
                 Uri = FirebaseConfig.endpoint + path + ".json" + GetAuthParam(),
                 DownloadHandler = eventHandler,
                 Retries = int.MaxValue,
-                RetrySecondsDelay = 1
+                RetrySecondsDelay = 1,
+                
             };
 
             //create an unsubscriber for events
-            var unsubscriberGO = GameObject.Find("FirebaseRestUnsubscriber");
+            var unsubscriberGO = GameObject.Find("FrcEventUnsubscriber" + path);
             if (unsubscriberGO == null)
             {
-                unsubscriberGO = new GameObject("FirebaseRestUnsubscriber");
+                unsubscriberGO = new GameObject("FrcEventUnsubscriber" + path);
                 unsubscriberGO.AddComponent<EventUnsubscriber>().requestHelper = req;
                 MonoBehaviour.DontDestroyOnLoad(unsubscriberGO);
             }
             //Error handling are being handled internally
             RESTHelper.Get(req, err => RequestErrorHelper.ToDictionary(err).ToList().ForEach(x => Debug.LogError(x.Key + " - " + x.Value)));
+
+#elif UNITY_WEBGL && !UNITY_EDITOR
+            string url = FirebaseConfig.endpoint + path + ".json" + GetAuthParam();
+            try
+            {
+                EventSource es = new EventSource();
+                es.Init(url);
+                es.OnEventMessage += eventHandler.ReceiveWebGlData;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError(ex.Message);
+            }
+            var esUnsubscriberGO = GameObject.Find("FrcEventSourceUnsubscriber");
+            if (esUnsubscriberGO == null)
+            {
+                esUnsubscriberGO = new GameObject("FrcEventSourceUnsubscriber");
+                esUnsubscriberGO.AddComponent<EventSourceUnsubscriber>();
+                MonoBehaviour.DontDestroyOnLoad(esUnsubscriberGO);
+            }
+#endif
         }
 
         /// <summary>

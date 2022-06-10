@@ -18,6 +18,11 @@ namespace FirebaseRestClient.Helper
             RestClient.Put<T>(request).Then(res => response(res)).Catch(err => error(err));
         }
 
+        public static void Put(RequestHelper request, Action<Exception> error)
+        {
+            RestClient.Put(request).Catch(err => error(err));
+        }
+
         public static void Post(string url, Action<string> response, Action<Exception> error)
         {
             RestClient.Post(url, null).Then(res => response(res.Text)).Catch(err => error(err));
