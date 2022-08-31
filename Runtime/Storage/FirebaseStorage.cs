@@ -154,7 +154,7 @@ namespace FirebaseRestClient
             {
                 UploadResponse uploadResponse = JsonUtility.FromJson<UploadResponse>(res);
 
-                uploadResponse.downloadUrl = $"{FirebaseConfig.storageEndpoint}{uploadResponse.name.Replace("/","%2F")}?alt=media&token={uploadResponse.downloadTokens}";
+                uploadResponse.downloadUrl = $"{FirebaseConfig.storageEndpoint}/{uploadResponse.name.Replace("/", "%2F")}?alt=media&token={uploadResponse.downloadTokens}";
 
                 callbackHandler.successCallback?.Invoke(uploadResponse);
             },
