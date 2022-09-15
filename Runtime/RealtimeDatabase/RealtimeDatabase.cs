@@ -787,7 +787,7 @@ namespace FirebaseRestClient
         /// <returns>returns shallow param if there is no authenticated user, else nothing</returns>
         string GetShallowParam()
         {
-            return FirebaseAuthentication.currentUser != null ? "" : $"?shallow=true";
+            return FirebaseAuthentication.currentUser != null ? "&shallow=true" : $"?shallow=true";
         }
 
         /// <summary>
