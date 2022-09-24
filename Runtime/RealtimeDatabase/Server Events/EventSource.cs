@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace FirebaseRestClient
 {
+#if UNITY_WEBGL && !UNITY_EDITOR
     public class EventSource
     {
         private Guid guid = Guid.NewGuid();
@@ -59,4 +60,5 @@ namespace FirebaseRestClient
             es.OnEventMessage.Invoke(guid, eventName, data);
         }
     }
+#endif
 }

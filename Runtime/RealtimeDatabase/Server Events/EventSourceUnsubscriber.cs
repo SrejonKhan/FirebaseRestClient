@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace FirebaseRestClient
 {
+#if UNITY_WEBGL && !UNITY_EDITOR
     public class EventSourceUnsubscriber : MonoBehaviour
     {
         private void OnDisable()
@@ -14,4 +15,5 @@ namespace FirebaseRestClient
             }
         }
     }
+#endif
 }
