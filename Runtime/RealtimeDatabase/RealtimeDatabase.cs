@@ -886,7 +886,7 @@ namespace FirebaseRestClient
                 string paramString = value.ToString();
                 int length = paramString.Length;
                 //make sure it's not json, if json, leave as it is.
-                if (paramString[0] != '{' && paramString[length - 1] != '}' && String.IsNullOrEmpty(paramString[0]) != true)
+                if (paramString[0] != '{' && paramString[length - 1] != '}' && paramString[length - 1] != '}')
                 {
                     body = $"\"{value}\"";
                     return body;
