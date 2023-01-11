@@ -445,6 +445,9 @@ namespace FirebaseRestClient
 
         public AccessTokenCallback RefreshIdToken(string refreshToken)
         {
+            if (currentUser == null)
+                currentUser = new FirebaseUser();
+
             AccessTokenCallback callbackHandler = new AccessTokenCallback();
 
             string rawBody = "{" +
@@ -481,6 +484,9 @@ namespace FirebaseRestClient
                 accessTokenRes.idToken = destructuredRes["id_token"];
                 accessTokenRes.userId = destructuredRes["user_id"];
                 accessTokenRes.projectId = destructuredRes["project_id"];
+
+                currentUser.accessToken = accessTokenRes.accessToken;
+                currentUser.refreshToken = accessTokenRes.refreshToken;
 
                 callbackHandler.successCallback?.Invoke(accessTokenRes);
             },
