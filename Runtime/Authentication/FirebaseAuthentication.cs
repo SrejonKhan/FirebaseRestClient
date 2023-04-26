@@ -278,8 +278,9 @@ namespace FirebaseRestClient
             $"response_type=code&" +
             $"scope={scopes}";
 
-            RedirectionListener redirectionListener;
-                
+            UnityMainThread.Init();
+
+            RedirectionListener redirectionListener;                
             redirectionListener = new RedirectionListener();
             redirectionListener.Init(5050, ProcessRedirectionCallback);
 
@@ -309,7 +310,6 @@ namespace FirebaseRestClient
 
             string authCode = splittedParts[0].Split('=')[1];
 
-            UnityMainThread.Init();
             UnityMainThread.Execute(() => GoogleSignIn(authCode));
         }
 
