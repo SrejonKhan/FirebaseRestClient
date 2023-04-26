@@ -1,0 +1,8 @@
+{
+  "name": "Firebase Rest Client",
+  "type": "library",
+  "platforms": ["Games"],
+  "content": "README.md",
+  "pages": [".github/CONTRIBUTING.md", ".github/CODE_OF_CONDUCT.md"],
+  "related": []
+}
